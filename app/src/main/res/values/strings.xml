@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Draw Diary</string>
+    <string name="addDrawing">그림일기 작성</string>
+    <string name="draw">그림</string>
+</resources>
