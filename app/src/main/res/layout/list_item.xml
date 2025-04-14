@@ -11,6 +11,6 @@
         android:layout_height="match_parent"
         android:contentDescription="@string/draw"
         android:padding="10dp"
-        tools:src="@drawable/ic_launcher_background" />
+        android:src="@drawable/ic_launcher_background" />
 
 </LinearLayout>

@@ -2,8 +2,10 @@ package com.ssafy.drawdiary
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.helper.widget.Grid
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.GridLayoutManager
 import com.ssafy.drawdiary.Adapter.ThumbAdapter
 import com.ssafy.drawdiary.data.DrawThumb
 import com.ssafy.drawdiary.databinding.ActivityMainBinding
@@ -41,7 +43,8 @@ class MainActivity : AppCompatActivity() {
         )
         val thumbAdapter = ThumbAdapter(R.layout.list_item, thumbs)
 
-        binding.listView.adapter = thumbAdapter
+
+        binding.recyclerView.adapter = thumbAdapter
 
 
     }
