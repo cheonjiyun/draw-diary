@@ -1,11 +1,11 @@
 package com.ssafy.drawdiary.Activity
 
 import android.os.Bundle
-import android.util.Log
 import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
+import com.ssafy.drawdiary.customDrawable.SeekbarThumbNumberDrawable
 import com.ssafy.drawdiary.databinding.ActivityDrawingBinding
 import com.ssafy.drawdiary.databinding.PopupPenBinding
 
@@ -26,10 +26,15 @@ class DrawingActivity : AppCompatActivity() {
         // 펜 굵기 설정 xml
         val popupPenBinding = PopupPenBinding.inflate(layoutInflater, LinearLayout(this), false)
 
+        val customDrawable = SeekbarThumbNumberDrawable()
+        popupPenBinding.seekBarPenStroke.thumb = customDrawable
+
         // 펜 굵기 data -> seekbar view에 반영
         fun settingSeekBarByStoke() {
             popupPenBinding.seekBarPenStroke.progress =
                 binding.customDrawView.currentStroke // 기존 굵기 반영
+
+            customDrawable.progress = binding.customDrawView.currentStroke
         }
 
         settingSeekBarByStoke()
@@ -39,6 +44,7 @@ class DrawingActivity : AppCompatActivity() {
             SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(p0: SeekBar?, progress: Int, p2: Boolean) {
                 binding.customDrawView.currentStroke = progress // 펜 굵기 바꾸기
+                settingSeekBarByStoke()
             }
 
             override fun onStartTrackingTouch(p0: SeekBar?) {
@@ -48,10 +54,10 @@ class DrawingActivity : AppCompatActivity() {
             }
         })
 
+
         popupPenBinding.btnMinus.setOnClickListener {
             binding.customDrawView.currentStroke = binding.customDrawView.currentStroke - 1
             settingSeekBarByStoke()
-            Log.d(TAG, "onCreate: ${binding.customDrawView.currentStroke}")
         }
 
         popupPenBinding.btnPlus.setOnClickListener {

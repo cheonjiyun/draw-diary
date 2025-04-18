@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+
     android:padding="10dp">
 
     <LinearLayout
@@ -10,34 +11,38 @@
         android:layout_margin="8dp"
         android:background="@drawable/background_popup"
         android:elevation="4dp"
-        android:orientation="horizontal"
-        android:padding="6dp">
+        android:orientation="horizontal">
 
         <ImageButton
             android:id="@+id/btn_minus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:layout_marginStart="10dp"
             android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="6dp"
             android:src="@drawable/icon_minus_24"
             android:text="-" />
 
         <SeekBar
             android:id="@+id/seekBar_pen_stroke"
-            style="@style/Widget.AppCompat.SeekBar.Discrete"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:layout_gravity="center"
             android:layout_weight="1"
             android:max="100"
-            android:min="1" />
+            android:min="1"
+            android:progress="10"
+            android:progressDrawable="@drawable/seekbar_pen_stroke_bar" />
 
         <ImageButton
             android:id="@+id/btn_plus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:layout_marginEnd="10dp"
             android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="6dp"
             android:src="@drawable/icon_plus_24"
             android:text="+" />
 
