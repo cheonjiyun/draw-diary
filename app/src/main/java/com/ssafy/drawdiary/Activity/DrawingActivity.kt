@@ -75,6 +75,16 @@ class DrawingActivity : AppCompatActivity() {
             )
             popupPenWindow.showAsDropDown(binding.pen)
         }
+
+
+        binding.undo.setOnClickListener {
+            binding.customDrawView.undo()
+        }
+
+        binding.redo.setOnClickListener {
+            binding.customDrawView.redo()
+        }
+
     }
 
 

@@ -24,6 +24,7 @@ class CustomDrawView(context: Context, attrs: AttributeSet?) : View(context, att
         }
 
     private val strokes = mutableListOf<Stroke>() // 굵기를 바꾸었을 때 기존 굵기는 바뀌면 안되므로 선을 구분해서 list에 담음
+    private val redoStack = mutableListOf<Stroke>()
     private var currentPath: Path? = null
 
     override fun onDraw(canvas: Canvas) {
@@ -70,4 +71,19 @@ class CustomDrawView(context: Context, attrs: AttributeSet?) : View(context, att
         return true
     }
 
+    fun undo() {
+        if (strokes.isNotEmpty()) {
+            val lastStroke = strokes.removeAt(strokes.lastIndex) // 마지막 하나 빼기
+            redoStack.add(lastStroke)
+            invalidate()
+        }
+    }
+
+    fun redo() {
+        if (redoStack.isNotEmpty()) {
+            val lastRedo = redoStack.removeAt(redoStack.lastIndex) // 마지막 하나 빼서
+            strokes.add(lastRedo)
+            invalidate()
+        }
+    }
 }
