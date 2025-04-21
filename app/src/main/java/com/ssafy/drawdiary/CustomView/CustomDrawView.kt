@@ -7,10 +7,12 @@ import android.graphics.Path
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import com.ssafy.drawdiary.Activity.DrawingActivity
 
 private const val TAG = "CustomDrawView_싸피"
 
-class CustomDrawView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
+class CustomDrawView(context: Context, attrs: AttributeSet?) :
+    View(context, attrs) {
 
     data class Stroke(val path: Path, val paint: Paint)
 
@@ -23,8 +25,8 @@ class CustomDrawView(context: Context, attrs: AttributeSet?) : View(context, att
             }
         }
 
-    private val strokes = mutableListOf<Stroke>() // 굵기를 바꾸었을 때 기존 굵기는 바뀌면 안되므로 선을 구분해서 list에 담음
-    private val redoStack = mutableListOf<Stroke>()
+    val strokes = mutableListOf<Stroke>() // 굵기를 바꾸었을 때 기존 굵기는 바뀌면 안되므로 선을 구분해서 list에 담음
+    val redoStack = mutableListOf<Stroke>()
     private var currentPath: Path? = null
 
     override fun onDraw(canvas: Canvas) {
@@ -65,8 +67,10 @@ class CustomDrawView(context: Context, attrs: AttributeSet?) : View(context, att
             MotionEvent.ACTION_UP -> {
 
             }
+
         }
-        invalidate();
+        invalidate()
+        (context as DrawingActivity)?.updateUI()
 
         return true
     }
