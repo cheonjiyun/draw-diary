@@ -1,13 +1,18 @@
-package com.ssafy.drawdiary.Activity
+package com.jduenv.drawdiary.Activity
 
 import android.os.Bundle
 import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.SeekBar
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.ssafy.drawdiary.customDrawable.SeekbarThumbNumberDrawable
-import com.ssafy.drawdiary.databinding.ActivityDrawingBinding
-import com.ssafy.drawdiary.databinding.PopupPenBinding
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import com.jduenv.drawdiary.CustomView.StrokeData
+import com.jduenv.drawdiary.customDrawable.SeekbarThumbNumberDrawable
+import com.jduenv.drawdiary.databinding.ActivityDrawingBinding
+import com.jduenv.drawdiary.databinding.PopupPenBinding
+import java.io.File
 
 
 private const val TAG = "DrawingActivity_싸피"
@@ -18,6 +23,8 @@ class DrawingActivity : AppCompatActivity() {
     private val popupPenBinding by lazy {
         PopupPenBinding.inflate(layoutInflater, LinearLayout(this), false)
     }
+
+    private var entryName: String? = null
 
     private val customDrawable = SeekbarThumbNumberDrawable()
 
@@ -30,6 +37,12 @@ class DrawingActivity : AppCompatActivity() {
 
         setContentView(binding.root)
 
+        // Intent 에서 ENTRY_NAME 받기
+        entryName = intent.getStringExtra("ENTRY_NAME")
+        entryName?.let {
+            binding.customDrawView.setEntryName(it)
+            loadEntry(it)    // stroke 데이터 로드
+        }
 
         popupPenBinding.seekBarPenStroke.thumb = customDrawable
 
@@ -84,6 +97,12 @@ class DrawingActivity : AppCompatActivity() {
             updateUI()
         }
 
+        binding.save.setOnClickListener {
+            val title = entryName ?: "임시 제목"
+            binding.customDrawView.save(title)
+            finish()
+        }
+
     }
 
     fun updateUI() {
@@ -92,11 +111,29 @@ class DrawingActivity : AppCompatActivity() {
 
         customDrawable.progress = binding.customDrawView.currentStroke // 프로그레스바 숫자 반영
 
-        // 뒤로가기
-        binding.undo.isEnabled = binding.customDrawView.strokes.isNotEmpty()
+        // 뒤로가기 버튼 활성화 여부
+        binding.undo.isEnabled = binding.customDrawView.canUndo
 
-        // 앞으로 가기
-        binding.redo.isEnabled = binding.customDrawView.redoStack.isNotEmpty()
+        // 앞으로가기 버튼 활성화 여부
+        binding.redo.isEnabled = binding.customDrawView.canRedo
     }
 
+    /**
+     * filesDir/ENTRY_NAME.json 에 저장된 획 데이터를 읽어서
+     * customDrawView 에 복원합니다.
+     */
+    private fun loadEntry(entryName: String) {
+        val jsonFile = File(filesDir, "$entryName.json")
+        if (!jsonFile.exists()) return
+
+        try {
+            val json = jsonFile.readText()
+            val type = object : TypeToken<List<StrokeData>>() {}.type
+            val dataList: List<StrokeData> = Gson().fromJson(json, type)
+            binding.customDrawView.setStrokesFromData(dataList)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(this, "불러오기 실패", Toast.LENGTH_SHORT).show()
+        }
+    }
 }

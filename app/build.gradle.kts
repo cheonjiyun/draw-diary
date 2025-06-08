@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.ssafy.drawdiary"
+    namespace = "com.jduenv.drawdiary"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.ssafy.drawdiary"
+        applicationId = "com.jduenv.drawdiary"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
@@ -39,7 +39,6 @@ android {
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -48,4 +47,6 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    implementation("com.google.code.gson:gson:2.13.1")
 }

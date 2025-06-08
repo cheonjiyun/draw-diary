@@ -1,4 +1,4 @@
-package com.ssafy.drawdiary.customDrawable
+package com.jduenv.drawdiary.customDrawable
 
 import android.graphics.Canvas
 import android.graphics.Color

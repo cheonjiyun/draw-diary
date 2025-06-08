@@ -39,9 +39,19 @@
             android:src="@drawable/icon_redo_24px"
             android:tint="@color/selector_undo" />
 
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/save"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="12dp"
+            android:src="@drawable/icon_save_24px"
+            android:tint="@color/selector_undo" />
+
+
     </LinearLayout>
 
-    <com.ssafy.drawdiary.CustomView.CustomDrawView
+    <com.jduenv.drawdiary.CustomView.CustomDrawView
         android:id="@+id/customDrawView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
