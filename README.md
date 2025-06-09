@@ -1,3 +1,3 @@
 ﻿# draw-diary
 
-![ㅇub.com/user-attachments/assets/2a57a3e9-d6ce-4ee8-a293-658a06ff15e8)
+![제목을 입력해주세요_-001](https://github.com/user-attachments/assets/4bcd82a3-3d73-4f48-ad1f-8c37abb954b2)
