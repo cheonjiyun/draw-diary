@@ -9,6 +9,20 @@
     tools:context=".Activity.DrawingActivity">
 
     <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="end"
+        android:orientation="horizontal">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/save"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:text="@string/save" />
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -39,15 +53,17 @@
             android:src="@drawable/icon_redo_24px"
             android:tint="@color/selector_undo" />
 
-        <androidx.appcompat.widget.AppCompatImageButton
-            android:id="@+id/save"
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/eraser_line"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:padding="12dp"
-            android:src="@drawable/icon_save_24px"
-            android:tint="@color/selector_undo" />
+            android:text="선 지우개" />
 
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/eraser_area"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="영역 지우개" />
 
     </LinearLayout>
 

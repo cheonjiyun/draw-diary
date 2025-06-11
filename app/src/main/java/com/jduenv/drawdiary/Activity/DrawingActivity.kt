@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.jduenv.drawdiary.CustomView.StrokeData
+import com.jduenv.drawdiary.CustomView.ToolMode
 import com.jduenv.drawdiary.customDrawable.SeekbarThumbNumberDrawable
 import com.jduenv.drawdiary.databinding.ActivityDrawingBinding
 import com.jduenv.drawdiary.databinding.PopupPenBinding
@@ -84,8 +85,9 @@ class DrawingActivity : AppCompatActivity() {
                 true
             )
             popupPenWindow.showAsDropDown(binding.pen)
-        }
 
+            binding.customDrawView.currentMode = ToolMode.DRAW
+        }
 
         binding.undo.setOnClickListener {
             binding.customDrawView.undo()
@@ -95,6 +97,14 @@ class DrawingActivity : AppCompatActivity() {
         binding.redo.setOnClickListener {
             binding.customDrawView.redo()
             updateUI()
+        }
+
+        binding.eraserLine.setOnClickListener {
+            binding.customDrawView.currentMode = ToolMode.ERASE_VECTOR
+        }
+
+        binding.eraserArea.setOnClickListener {
+            binding.customDrawView.currentMode = ToolMode.ERASE_AREA
         }
 
         binding.save.setOnClickListener {
