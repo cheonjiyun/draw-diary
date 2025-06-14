@@ -8,8 +8,6 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.PathMeasure
 import android.graphics.PointF
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffXfermode
 import android.graphics.drawable.ColorDrawable
 import android.util.AttributeSet
 import android.util.Log
@@ -54,16 +52,7 @@ class CustomDrawView(context: Context, attrs: AttributeSet?) :
 
     /** 그리기 · 벡터 지우개 · 비트맵 지우개 모드를 구분 */
     var currentMode: ToolMode = ToolMode.DRAW
-
-    // 지우개
-    private var eraserPath: Path? = null
-    private val eraserPaint = Paint().apply {
-        isAntiAlias = true
-        strokeCap = Paint.Cap.ROUND
-        strokeWidth = eraserRadius * 2
-        xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR)
-    }
-
+    var lastEraserMode: ToolMode = ToolMode.ERASE_VECTOR
 
     private lateinit var bitmapBuffer: Bitmap
     private lateinit var canvasBuffer: Canvas

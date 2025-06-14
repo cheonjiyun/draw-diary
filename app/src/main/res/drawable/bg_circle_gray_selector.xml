@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 선택(Selected) 혹은 눌린(Pressed) 상태일 때 -->
+    <item android:state_selected="true">
+        <shape android:shape="oval">
+            <!-- 원하는 회색을 지정 -->
+            <solid android:color="#DDDDDD"/>
+            <!-- 모서리까지 동그랗게 -->
+            <size android:width="36dp" android:height="36dp"/>
+        </shape>
+    </item>
+    <!-- 기본 상태 -->
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="@android:color/transparent"/>
+            <size android:width="36dp" android:height="36dp"/>
+        </shape>
+    </item>
+</selector>

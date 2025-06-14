@@ -25,22 +25,24 @@
     <LinearLayout
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="8dp">
 
         <androidx.appcompat.widget.AppCompatImageButton
             android:id="@+id/pen"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:padding="12dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/bg_circle_gray_selector"
             android:src="@drawable/icon_pen_24px" />
 
         <androidx.appcompat.widget.AppCompatImageButton
             android:id="@+id/undo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:padding="12dp"
+            android:padding="6dp"
             android:src="@drawable/icon_undo_24px"
             android:tint="@color/selector_undo" />
 
@@ -48,22 +50,20 @@
             android:id="@+id/redo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:padding="12dp"
+            android:padding="6dp"
             android:src="@drawable/icon_redo_24px"
             android:tint="@color/selector_undo" />
 
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/eraser_line"
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/eraser"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="선 지우개" />
-
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/eraser_area"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="영역 지우개" />
+            android:background="@drawable/bg_circle_gray_selector"
+            android:padding="6dp"
+            android:src="@drawable/icon_eraser_24"
+            android:tint="@color/selector_undo" />
 
     </LinearLayout>
 
@@ -72,6 +72,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:background="@color/white"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout"
         tools:layout_editor_absoluteX="343dp" />
 

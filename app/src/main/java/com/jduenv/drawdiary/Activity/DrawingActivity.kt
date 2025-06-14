@@ -1,6 +1,7 @@
 package com.jduenv.drawdiary.Activity
 
 import android.os.Bundle
+import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.SeekBar
@@ -12,6 +13,7 @@ import com.jduenv.drawdiary.CustomView.StrokeData
 import com.jduenv.drawdiary.CustomView.ToolMode
 import com.jduenv.drawdiary.customDrawable.SeekbarThumbNumberDrawable
 import com.jduenv.drawdiary.databinding.ActivityDrawingBinding
+import com.jduenv.drawdiary.databinding.PopupEraserBinding
 import com.jduenv.drawdiary.databinding.PopupPenBinding
 import java.io.File
 
@@ -23,6 +25,11 @@ class DrawingActivity : AppCompatActivity() {
     // 펜 굵기 설정 xml
     private val popupPenBinding by lazy {
         PopupPenBinding.inflate(layoutInflater, LinearLayout(this), false)
+    }
+
+    // 지우개 모드 설정 xml
+    private val popupEraserBinding by lazy {
+        PopupEraserBinding.inflate(layoutInflater, LinearLayout(this), false)
     }
 
     private var entryName: String? = null
@@ -76,16 +83,23 @@ class DrawingActivity : AppCompatActivity() {
             updateUI()
         }
 
+        binding.pen.isSelected = true
         binding.pen.setOnClickListener {
-            // 팝업 윈도우 띄우기
-            val popupPenWindow = PopupWindow(
-                popupPenBinding.root,
-                popupPenBinding.root.layoutParams.width,
-                popupPenBinding.root.layoutParams.height,
-                true
-            )
-            popupPenWindow.showAsDropDown(binding.pen)
+            // ui
+            binding.pen.isSelected = true
+            binding.eraser.isSelected = false
+            if (binding.customDrawView.currentMode == ToolMode.DRAW) {
+                // 팝업 윈도우 띄우기
+                val popupPenWindow = PopupWindow(
+                    popupPenBinding.root,
+                    popupPenBinding.root.layoutParams.width,
+                    popupPenBinding.root.layoutParams.height,
+                    true
+                )
+                popupPenWindow.showAsDropDown(binding.pen)
+            }
 
+            // data
             binding.customDrawView.currentMode = ToolMode.DRAW
         }
 
@@ -99,12 +113,40 @@ class DrawingActivity : AppCompatActivity() {
             updateUI()
         }
 
-        binding.eraserLine.setOnClickListener {
-            binding.customDrawView.currentMode = ToolMode.ERASE_VECTOR
+        binding.eraser.setOnClickListener {
+            // ui
+            binding.pen.isSelected = false
+            binding.eraser.isSelected = true
+            if (binding.customDrawView.currentMode == ToolMode.ERASE_VECTOR || binding.customDrawView.currentMode == ToolMode.ERASE_AREA) {
+                // 팝업 윈도우 띄우기
+                val popupEraserWindow = PopupWindow(
+                    popupEraserBinding.root,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    true
+                )
+
+                popupEraserWindow.showAsDropDown(binding.eraser)
+            }
+
+            // data
+            if (binding.customDrawView.lastEraserMode == ToolMode.ERASE_VECTOR) {
+                popupEraserBinding.eraserLine.isChecked = true
+                binding.customDrawView.currentMode = ToolMode.ERASE_VECTOR
+            } else if (binding.customDrawView.lastEraserMode == ToolMode.ERASE_AREA) {
+                popupEraserBinding.eraserArea.isChecked = true
+                binding.customDrawView.currentMode = ToolMode.ERASE_AREA
+            }
         }
 
-        binding.eraserArea.setOnClickListener {
+        popupEraserBinding.eraserLine.setOnClickListener {
+            binding.customDrawView.currentMode = ToolMode.ERASE_VECTOR
+            binding.customDrawView.lastEraserMode = ToolMode.ERASE_VECTOR
+        }
+
+        popupEraserBinding.eraserArea.setOnClickListener {
             binding.customDrawView.currentMode = ToolMode.ERASE_AREA
+            binding.customDrawView.lastEraserMode = ToolMode.ERASE_AREA
         }
 
         binding.save.setOnClickListener {
