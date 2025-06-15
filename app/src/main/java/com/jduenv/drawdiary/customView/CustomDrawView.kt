@@ -1,4 +1,4 @@
-package com.jduenv.drawdiary.CustomView
+package com.jduenv.drawdiary.customView
 
 import android.content.Context
 import android.graphics.Bitmap

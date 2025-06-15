@@ -1,79 +1,97 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context=".Activity.DrawingActivity">
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="com.jduenv.drawdiary.customView.ToolMode" />
+
+        <import type="java.util.Arrays" />
+
+        <variable
+            name="currentMode"
+            type="ToolMode" />
+
+    </data>
 
     <LinearLayout
+        android:id="@+id/main"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="end"
-        android:orientation="horizontal">
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:context=".Activity.DrawingActivity">
 
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/save"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:text="@string/save" />
+            android:gravity="end"
+            android:orientation="horizontal">
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/save"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:text="@string/save" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="8dp">
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/pen"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/bg_circle_gray_selector"
+                android:src="@drawable/icon_pen_24px"
+                app:currentMode="@{currentMode}"
+                app:modeValue="@{ToolMode.DRAW}" />
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/undo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="6dp"
+                android:src="@drawable/icon_undo_24px"
+                android:tint="@color/selector_undo" />
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/redo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="6dp"
+                android:src="@drawable/icon_redo_24px"
+                android:tint="@color/selector_undo" />
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/eraser"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_circle_gray_selector"
+                android:padding="6dp"
+                android:src="@drawable/icon_eraser_24"
+                app:currentMode="@{currentMode}"
+                app:modeValues="@{Arrays.asList(ToolMode.ERASE_VECTOR, ToolMode.ERASE_AREA)}" />
+
+        </LinearLayout>
+
+        <com.jduenv.drawdiary.customView.CustomDrawView
+            android:id="@+id/customDrawView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@color/white"
+            app:layout_constraintTop_toBottomOf="@+id/linearLayout"
+            tools:layout_editor_absoluteX="343dp" />
+
     </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/linearLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingHorizontal="8dp">
-
-        <androidx.appcompat.widget.AppCompatImageButton
-            android:id="@+id/pen"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:background="@drawable/bg_circle_gray_selector"
-            android:src="@drawable/icon_pen_24px" />
-
-        <androidx.appcompat.widget.AppCompatImageButton
-            android:id="@+id/undo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:padding="6dp"
-            android:src="@drawable/icon_undo_24px"
-            android:tint="@color/selector_undo" />
-
-        <androidx.appcompat.widget.AppCompatImageButton
-            android:id="@+id/redo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:padding="6dp"
-            android:src="@drawable/icon_redo_24px"
-            android:tint="@color/selector_undo" />
-
-        <androidx.appcompat.widget.AppCompatImageButton
-            android:id="@+id/eraser"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_circle_gray_selector"
-            android:padding="6dp"
-            android:src="@drawable/icon_eraser_24"
-            android:tint="@color/selector_undo" />
-
-    </LinearLayout>
-
-    <com.jduenv.drawdiary.CustomView.CustomDrawView
-        android:id="@+id/customDrawView"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:background="@color/white"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout"
-        tools:layout_editor_absoluteX="343dp" />
-
-</LinearLayout>
+</layout>

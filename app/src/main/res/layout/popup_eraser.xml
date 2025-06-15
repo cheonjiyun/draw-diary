@@ -1,35 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:padding="10dp">
+<layout>
 
-    <LinearLayout
-        android:layout_width="300dp"
-        android:layout_height="match_parent"
-        android:layout_margin="8dp"
-        android:background="@drawable/background_popup"
-        android:elevation="4dp"
-        android:orientation="horizontal">
+    <data>
 
-        <RadioGroup
-            android:layout_width="match_parent"
+        <import type="com.jduenv.drawdiary.customView.ToolMode" />
+
+        <variable
+            name="currentMode"
+            type="ToolMode" />
+    </data>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="10dp">
+
+        <LinearLayout
+            android:layout_width="300dp"
             android:layout_height="match_parent"
-            android:padding="8dp">
+            android:layout_margin="8dp"
+            android:background="@drawable/background_popup"
+            android:elevation="4dp"
+            android:orientation="horizontal">
 
-            <com.google.android.material.radiobutton.MaterialRadioButton
-                android:id="@+id/eraser_line"
+            <RadioGroup
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="선 지우개" />
+                android:layout_height="match_parent"
+                android:padding="8dp">
 
-            <com.google.android.material.radiobutton.MaterialRadioButton
-                android:id="@+id/eraser_area"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="영역 지우개" />
-        </RadioGroup>
+                <com.google.android.material.radiobutton.MaterialRadioButton
+                    android:id="@+id/eraser_line"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:checked="@{currentMode == ToolMode.ERASE_VECTOR}"
+                    android:text="선 지우개" />
+
+                <com.google.android.material.radiobutton.MaterialRadioButton
+                    android:id="@+id/eraser_area"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:checked="@{currentMode == ToolMode.ERASE_AREA}"
+                    android:text="영역 지우개" />
+            </RadioGroup>
+
+        </LinearLayout>
 
     </LinearLayout>
-
-</LinearLayout>
+</layout>

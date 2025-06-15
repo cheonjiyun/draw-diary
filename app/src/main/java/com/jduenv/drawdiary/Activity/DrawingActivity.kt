@@ -9,9 +9,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.jduenv.drawdiary.CustomView.StrokeData
-import com.jduenv.drawdiary.CustomView.ToolMode
 import com.jduenv.drawdiary.customDrawable.SeekbarThumbNumberDrawable
+import com.jduenv.drawdiary.customView.StrokeData
+import com.jduenv.drawdiary.customView.ToolMode
 import com.jduenv.drawdiary.databinding.ActivityDrawingBinding
 import com.jduenv.drawdiary.databinding.PopupEraserBinding
 import com.jduenv.drawdiary.databinding.PopupPenBinding
@@ -73,17 +73,9 @@ class DrawingActivity : AppCompatActivity() {
         })
 
 
-        popupPenBinding.btnMinus.setOnClickListener {
-            binding.customDrawView.currentStroke = binding.customDrawView.currentStroke - 1
-            updateUI()
-        }
+        // 초기설정
+        binding.currentMode = binding.customDrawView.currentMode
 
-        popupPenBinding.btnPlus.setOnClickListener {
-            binding.customDrawView.currentStroke = binding.customDrawView.currentStroke + 1
-            updateUI()
-        }
-
-        binding.pen.isSelected = true
         binding.pen.setOnClickListener {
             // ui
             binding.pen.isSelected = true
@@ -101,6 +93,7 @@ class DrawingActivity : AppCompatActivity() {
 
             // data
             binding.customDrawView.currentMode = ToolMode.DRAW
+            binding.currentMode = binding.customDrawView.currentMode
         }
 
         binding.undo.setOnClickListener {
@@ -115,8 +108,6 @@ class DrawingActivity : AppCompatActivity() {
 
         binding.eraser.setOnClickListener {
             // ui
-            binding.pen.isSelected = false
-            binding.eraser.isSelected = true
             if (binding.customDrawView.currentMode == ToolMode.ERASE_VECTOR || binding.customDrawView.currentMode == ToolMode.ERASE_AREA) {
                 // 팝업 윈도우 띄우기
                 val popupEraserWindow = PopupWindow(
@@ -131,12 +122,15 @@ class DrawingActivity : AppCompatActivity() {
 
             // data
             if (binding.customDrawView.lastEraserMode == ToolMode.ERASE_VECTOR) {
-                popupEraserBinding.eraserLine.isChecked = true
                 binding.customDrawView.currentMode = ToolMode.ERASE_VECTOR
+                binding.currentMode = binding.customDrawView.currentMode
+                popupEraserBinding.currentMode = binding.customDrawView.currentMode
             } else if (binding.customDrawView.lastEraserMode == ToolMode.ERASE_AREA) {
-                popupEraserBinding.eraserArea.isChecked = true
                 binding.customDrawView.currentMode = ToolMode.ERASE_AREA
+                binding.currentMode = binding.customDrawView.currentMode
+                popupEraserBinding.currentMode = binding.customDrawView.currentMode
             }
+
         }
 
         popupEraserBinding.eraserLine.setOnClickListener {
@@ -155,6 +149,7 @@ class DrawingActivity : AppCompatActivity() {
             finish()
         }
 
+        initEvent()
     }
 
     fun updateUI() {
@@ -186,6 +181,18 @@ class DrawingActivity : AppCompatActivity() {
         } catch (e: Exception) {
             e.printStackTrace()
             Toast.makeText(this, "불러오기 실패", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    fun initEvent() {
+        popupPenBinding.btnMinus.setOnClickListener {
+            binding.customDrawView.currentStroke = binding.customDrawView.currentStroke - 1
+            updateUI()
+        }
+
+        popupPenBinding.btnPlus.setOnClickListener {
+            binding.customDrawView.currentStroke = binding.customDrawView.currentStroke + 1
+            updateUI()
         }
     }
 }
