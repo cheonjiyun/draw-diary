@@ -1,6 +1,7 @@
 package com.jduenv.drawdiary.viewmodel
 
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.graphics.PointF
 import android.util.Log
 import androidx.lifecycle.LiveData
@@ -32,6 +33,9 @@ class DrawingViewModel(
     private val _strokeWidth = MutableLiveData(10)
     val strokeWidth: LiveData<Int> = _strokeWidth
 
+    private val _currentColor = MutableLiveData(Color.BLACK)
+    val currentColor: LiveData<Int> = _currentColor
+
     private val _currentMode = MutableLiveData<ToolMode>(ToolMode.DRAW)
     val currentMode: LiveData<ToolMode> = _currentMode
 
@@ -41,6 +45,10 @@ class DrawingViewModel(
     val canUndo: LiveData<Boolean> = _strokes.map { undoStack.isNotEmpty() }
     val canRedo: LiveData<Boolean> = _strokes.map { redoStack.isNotEmpty() }
 
+
+    fun setCurrentColor(newColor: Int) {
+        _currentColor.value = newColor
+    }
 
     /** JSON → LiveData 로 초기 로드 */
     fun loadEntry(filesDir: File, entryName: String) {

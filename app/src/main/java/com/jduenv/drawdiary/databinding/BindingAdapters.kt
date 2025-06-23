@@ -1,5 +1,6 @@
 package com.jduenv.drawdiary.databinding
 
+import android.content.res.ColorStateList
 import android.view.View
 import androidx.databinding.BindingAdapter
 import com.jduenv.drawdiary.customView.ToolMode
@@ -26,4 +27,13 @@ object BindingAdapters {
     ) {
         view.isSelected = modeValues?.any { it == currentMode } == true
     }
+
+    @JvmStatic
+    @BindingAdapter("backgroundTintColor")
+    fun setBackgroundTint(view: View, color: Int?) {
+        if (color != null) {
+            view.backgroundTintList = ColorStateList.valueOf(color)
+        }
+    }
+
 }

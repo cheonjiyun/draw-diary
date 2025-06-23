@@ -65,6 +65,9 @@ class CustomDrawView(context: Context, attrs: AttributeSet?) :
     /** 그리기 · 벡터 지우개 · 비트맵 지우개 모드를 구분 */
     var currentMode: ToolMode = ToolMode.DRAW
 
+    var currentStroke: Int = 10
+    var currentColor: Int = Color.BLACK
+
     private lateinit var bitmapBuffer: Bitmap
     private lateinit var canvasBuffer: Canvas
 
@@ -78,15 +81,12 @@ class CustomDrawView(context: Context, attrs: AttributeSet?) :
         entryName = name
     }
 
-    var currentStroke: Int = 10
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
         // 1. 비트맵그리기
         canvas.drawBitmap(bitmapBuffer, 0f, 0f, null)
-
-        currentDrawPath?.let { canvas.drawPath(it, currentDrawPaint) }
 
         for (stroke in strokes) {
             val path = Path().apply {
@@ -97,6 +97,10 @@ class CustomDrawView(context: Context, attrs: AttributeSet?) :
             }
             canvas.drawPath(path, stroke.paint)
         }
+
+
+        currentDrawPath?.let { canvas.drawPath(it, currentDrawPaint) }
+
     }
 
 
@@ -122,7 +126,7 @@ class CustomDrawView(context: Context, attrs: AttributeSet?) :
                             style = Paint.Style.STROKE
                             strokeCap = Paint.Cap.ROUND
                             strokeWidth = currentStroke.toFloat()
-                            color = Color.BLACK
+                            color = currentColor
                         }
                         currentDrawPath = Path().apply { moveTo(x, y) }
                     }
@@ -214,7 +218,6 @@ class CustomDrawView(context: Context, attrs: AttributeSet?) :
             }
         }
 
-
         invalidate()
 
         return true
@@ -234,19 +237,6 @@ class CustomDrawView(context: Context, attrs: AttributeSet?) :
         redrawBitmapBuffer()
         invalidate()
     }
-
-//    /**
-//     * 두 저장을 한번에 실행하고, 토스트로 결과 알림
-//     */
-//    fun save(title: String) {
-//        val jsonFile = saveDataAsJson(title)
-//        val pngFile = saveViewAsPng(title)
-//        val msg = buildString {
-//            if (jsonFile != null) append("저장되었습니다.") else append("JSON 저장실패\n")
-//            if (pngFile != null) append("저장되었습니다.") else append("PNG 저장실패")
-//        }
-//        Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
-//    }
 
     override fun onSizeChanged(width: Int, height: Int, oldWidth: Int, oldHeight: Int) {
         super.onSizeChanged(width, height, oldWidth, oldHeight)

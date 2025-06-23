@@ -1,6 +1,8 @@
 package com.jduenv.drawdiary.Activity
 
+import android.R
 import android.os.Bundle
+import android.util.Log
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.PopupWindow
@@ -17,6 +19,8 @@ import com.jduenv.drawdiary.databinding.ActivityDrawingBinding
 import com.jduenv.drawdiary.databinding.PopupEraserBinding
 import com.jduenv.drawdiary.databinding.PopupPenBinding
 import com.jduenv.drawdiary.viewmodel.DrawingViewModel
+import com.skydoves.colorpickerview.ColorPickerDialog
+import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 import java.io.File
 
 
@@ -196,9 +200,28 @@ class DrawingActivity : AppCompatActivity() {
             val bmp = binding.customDrawView.captureBitmap()
             viewModel.saveAll(filesDir, entryName ?: "untitled", bmp)
         }
-        viewModel.saveResult.observe(this) { success ->
-            Toast.makeText(this, if (success) "저장 완료" else "저장 실패", Toast.LENGTH_LONG).show()
-            if (success) finish()
+
+        binding.pickColor.setOnClickListener {
+            ColorPickerDialog.Builder(this)
+                .setTitle("ColorPicker Dialog")
+                .setPreferenceName("MyColorPickerDialog")
+                .setPositiveButton(
+                    getString(R.string.copy),
+                    ColorEnvelopeListener { envelope, fromUser ->
+                        viewModel.setCurrentColor(envelope.color)
+                        Log.d(
+                            TAG,
+                            "ColorEnvelopeListener:  ${envelope.hexCode}"
+                        )
+//                        setLayoutColor(envelope)
+                    })
+                .setNegativeButton(
+                    getString(R.string.cancel)
+                ) { dialogInterface, i -> dialogInterface.dismiss() }
+                .attachAlphaSlideBar(true) // the default value is true.
+                .attachBrightnessSlideBar(true) // the default value is true.
+                .setBottomSpace(12) // set a bottom space between the last slidebar and buttons.
+                .show()
         }
 
     }
@@ -243,6 +266,17 @@ class DrawingActivity : AppCompatActivity() {
         // 선 정보 변경
         viewModel.strokes.observe(this) { list ->
             binding.customDrawView.setStrokes(list)
+        }
+
+        // 색
+        viewModel.currentColor.observe(this) { color ->
+            binding.customDrawView.currentColor = color
+        }
+
+        // 저장 끝
+        viewModel.saveResult.observe(this) { success ->
+            Toast.makeText(this, if (success) "저장 완료" else "저장 실패", Toast.LENGTH_LONG).show()
+            if (success) finish()
         }
     }
 }
