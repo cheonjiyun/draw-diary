@@ -6,6 +6,7 @@ import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.SeekBar
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -15,12 +16,16 @@ import com.jduenv.drawdiary.customView.ToolMode
 import com.jduenv.drawdiary.databinding.ActivityDrawingBinding
 import com.jduenv.drawdiary.databinding.PopupEraserBinding
 import com.jduenv.drawdiary.databinding.PopupPenBinding
+import com.jduenv.drawdiary.viewmodel.DrawingViewModel
 import java.io.File
 
 
 private const val TAG = "DrawingActivity_싸피"
 
 class DrawingActivity : AppCompatActivity() {
+
+    // viewmodel
+    private val viewModel: DrawingViewModel by viewModels()
 
     // 펜 굵기 설정 xml
     private val popupPenBinding by lazy {
@@ -42,27 +47,40 @@ class DrawingActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContentView(binding.root)
 
-        // Intent 에서 ENTRY_NAME 받기
-        entryName = intent.getStringExtra("ENTRY_NAME")
-        entryName?.let {
-            binding.customDrawView.setEntryName(it)
-            loadEntry(it)    // stroke 데이터 로드
+        initGetIntent()
+        initViewModel()
+        initSetSeekBarThumb()
+        initEvent()
+        initEventByPopupEraser()
+        initObserve()
+
+        // 리스너 등록
+        binding.customDrawView.apply {
+            setOnStrokeCompleteListener { sd ->
+                viewModel.addStroke(sd)
+            }
+            // “지우기 시작”에만 snapshotForUndo 호출
+            setOnEraseStartListener {
+                viewModel.beginErase()
+            }
+            // 실제 지우기 동작은 기존 eraseVector / eraseArea
+            setOnEraseListener { mode, x, y ->
+                when (mode) {
+                    ToolMode.ERASE_VECTOR -> viewModel.eraseVector(x, y)
+                    ToolMode.ERASE_AREA -> viewModel.eraseArea(x, y)
+                    else -> {}
+                }
+            }
+            //
         }
-
-        popupPenBinding.seekBarPenStroke.thumb = customDrawable
-
-        // 펜 굵기 data -> seekbar view에 반영
-        updateUI()
 
         // 값이 바뀔 때
         popupPenBinding.seekBarPenStroke.setOnSeekBarChangeListener(object :
             SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(p0: SeekBar?, progress: Int, p2: Boolean) {
-                binding.customDrawView.currentStroke = progress // 펜 굵기 바꾸기
-                updateUI()
+                viewModel.setStrokeWidth(progress)
             }
 
             override fun onStartTrackingTouch(p0: SeekBar?) {
@@ -72,98 +90,36 @@ class DrawingActivity : AppCompatActivity() {
             }
         })
 
-
-        // 초기설정
-        binding.currentMode = binding.customDrawView.currentMode
-
-        binding.pen.setOnClickListener {
-            // ui
-            binding.pen.isSelected = true
-            binding.eraser.isSelected = false
-            if (binding.customDrawView.currentMode == ToolMode.DRAW) {
-                // 팝업 윈도우 띄우기
-                val popupPenWindow = PopupWindow(
-                    popupPenBinding.root,
-                    popupPenBinding.root.layoutParams.width,
-                    popupPenBinding.root.layoutParams.height,
-                    true
-                )
-                popupPenWindow.showAsDropDown(binding.pen)
+        binding.customDrawView.post {
+            intent.getStringExtra("ENTRY_NAME")?.let { name ->
+                viewModel.loadEntry(filesDir, name)
             }
-
-            // data
-            binding.customDrawView.currentMode = ToolMode.DRAW
-            binding.currentMode = binding.customDrawView.currentMode
         }
-
-        binding.undo.setOnClickListener {
-            binding.customDrawView.undo()
-            updateUI()
-        }
-
-        binding.redo.setOnClickListener {
-            binding.customDrawView.redo()
-            updateUI()
-        }
-
-        binding.eraser.setOnClickListener {
-            // ui
-            if (binding.customDrawView.currentMode == ToolMode.ERASE_VECTOR || binding.customDrawView.currentMode == ToolMode.ERASE_AREA) {
-                // 팝업 윈도우 띄우기
-                val popupEraserWindow = PopupWindow(
-                    popupEraserBinding.root,
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    true
-                )
-
-                popupEraserWindow.showAsDropDown(binding.eraser)
-            }
-
-            // data
-            if (binding.customDrawView.lastEraserMode == ToolMode.ERASE_VECTOR) {
-                binding.customDrawView.currentMode = ToolMode.ERASE_VECTOR
-                binding.currentMode = binding.customDrawView.currentMode
-                popupEraserBinding.currentMode = binding.customDrawView.currentMode
-            } else if (binding.customDrawView.lastEraserMode == ToolMode.ERASE_AREA) {
-                binding.customDrawView.currentMode = ToolMode.ERASE_AREA
-                binding.currentMode = binding.customDrawView.currentMode
-                popupEraserBinding.currentMode = binding.customDrawView.currentMode
-            }
-
-        }
-
-        popupEraserBinding.eraserLine.setOnClickListener {
-            binding.customDrawView.currentMode = ToolMode.ERASE_VECTOR
-            binding.customDrawView.lastEraserMode = ToolMode.ERASE_VECTOR
-        }
-
-        popupEraserBinding.eraserArea.setOnClickListener {
-            binding.customDrawView.currentMode = ToolMode.ERASE_AREA
-            binding.customDrawView.lastEraserMode = ToolMode.ERASE_AREA
-        }
-
-        binding.save.setOnClickListener {
-            val title = entryName ?: "임시 제목"
-            binding.customDrawView.save(title)
-            finish()
-        }
-
-        initEvent()
     }
 
-    fun updateUI() {
-        popupPenBinding.seekBarPenStroke.progress =
-            binding.customDrawView.currentStroke // 기존 굵기 반영
-
-        customDrawable.progress = binding.customDrawView.currentStroke // 프로그레스바 숫자 반영
-
-        // 뒤로가기 버튼 활성화 여부
-        binding.undo.isEnabled = binding.customDrawView.canUndo
-
-        // 앞으로가기 버튼 활성화 여부
-        binding.redo.isEnabled = binding.customDrawView.canRedo
+    private fun initGetIntent() {
+        // Intent 에서 ENTRY_NAME 받기
+        entryName = intent.getStringExtra("ENTRY_NAME")
+        entryName?.let {
+            binding.customDrawView.setEntryName(it)
+            loadEntry(it)    // stroke 데이터 로드
+        }
     }
+
+    private fun initViewModel() {
+        // viewModel
+        binding.lifecycleOwner = this
+        binding.viewModel = viewModel
+
+        binding.lifecycleOwner = this
+        popupEraserBinding.viewModel = viewModel
+    }
+
+
+    private fun initSetSeekBarThumb() {
+        popupPenBinding.seekBarPenStroke.thumb = customDrawable
+    }
+
 
     /**
      * filesDir/ENTRY_NAME.json 에 저장된 획 데이터를 읽어서
@@ -184,15 +140,109 @@ class DrawingActivity : AppCompatActivity() {
         }
     }
 
-    fun initEvent() {
+    private fun initEvent() {
+        binding.pen.setOnClickListener {
+            // ui
+            // 두번 눌렀을 때만 팝업 윈도우 띄우기
+            if (viewModel.currentMode.value == ToolMode.DRAW) {
+                val popupPenWindow = PopupWindow(
+                    popupPenBinding.root,
+                    popupPenBinding.root.layoutParams.width,
+                    popupPenBinding.root.layoutParams.height,
+                    true
+                )
+                popupPenWindow.showAsDropDown(binding.pen)
+            }
+
+            // data
+            viewModel.selectMode(ToolMode.DRAW)
+        }
+
         popupPenBinding.btnMinus.setOnClickListener {
-            binding.customDrawView.currentStroke = binding.customDrawView.currentStroke - 1
-            updateUI()
+            viewModel.minusStrokeWidth()
         }
 
         popupPenBinding.btnPlus.setOnClickListener {
-            binding.customDrawView.currentStroke = binding.customDrawView.currentStroke + 1
-            updateUI()
+            viewModel.plusStrokeWidth()
+        }
+
+        binding.undo.setOnClickListener {
+            viewModel.undo()
+        }
+
+        binding.redo.setOnClickListener {
+            viewModel.redo()
+        }
+
+        binding.eraser.setOnClickListener {
+            // ui
+            if (viewModel.currentMode.value == ToolMode.ERASE_VECTOR || viewModel.currentMode.value == ToolMode.ERASE_AREA) {
+                // 팝업 윈도우 띄우기
+                val popupEraserWindow = PopupWindow(
+                    popupEraserBinding.root,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    true
+                )
+
+                popupEraserWindow.showAsDropDown(binding.eraser)
+            }
+
+            // data: 가장 최근 지우개 모드에 따라 미리 설정
+            viewModel.selectMode(viewModel.lastEraserMode)
+        }
+
+        binding.save.setOnClickListener {
+            val bmp = binding.customDrawView.captureBitmap()
+            viewModel.saveAll(filesDir, entryName ?: "untitled", bmp)
+        }
+        viewModel.saveResult.observe(this) { success ->
+            Toast.makeText(this, if (success) "저장 완료" else "저장 실패", Toast.LENGTH_LONG).show()
+            if (success) finish()
+        }
+
+    }
+
+    private fun initEventByPopupEraser() {
+        popupEraserBinding.eraserLine.setOnClickListener {
+            viewModel.selectMode(ToolMode.ERASE_VECTOR)
+        }
+
+        popupEraserBinding.eraserArea.setOnClickListener {
+            viewModel.selectMode(ToolMode.ERASE_AREA)
+        }
+    }
+
+    private fun initObserve() {
+        // 모드
+        viewModel.currentMode.observe(this) { mode ->
+            // data
+            binding.customDrawView.currentMode = mode
+
+            // ui
+            binding.pen.isSelected = mode == ToolMode.DRAW
+            binding.eraser.isSelected = mode == ToolMode.ERASE_VECTOR || mode == ToolMode.ERASE_AREA
+        }
+
+        // 굵기
+        viewModel.strokeWidth.observe(this) { stokeWidth ->
+            binding.customDrawView.currentStroke = stokeWidth // data
+            popupPenBinding.seekBarPenStroke.progress = stokeWidth // 바
+            customDrawable.progress = stokeWidth // 동그라미안에 숫자
+        }
+
+        // 뒤로가기
+        viewModel.canUndo.observe(this) { enabled ->
+            binding.undo.isEnabled = enabled
+        }
+
+        viewModel.canRedo.observe(this) { enabled ->
+            binding.redo.isEnabled = enabled
+        }
+
+        // 선 정보 변경
+        viewModel.strokes.observe(this) { list ->
+            binding.customDrawView.setStrokes(list)
         }
     }
 }

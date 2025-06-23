@@ -10,8 +10,8 @@
         <import type="java.util.Arrays" />
 
         <variable
-            name="currentMode"
-            type="ToolMode" />
+            name="viewModel"
+            type="com.jduenv.drawdiary.viewmodel.DrawingViewModel" />
 
     </data>
 
@@ -49,7 +49,7 @@
                 android:layout_marginEnd="8dp"
                 android:background="@drawable/bg_circle_gray_selector"
                 android:src="@drawable/icon_pen_24px"
-                app:currentMode="@{currentMode}"
+                app:currentMode="@{viewModel.currentMode}"
                 app:modeValue="@{ToolMode.DRAW}" />
 
             <androidx.appcompat.widget.AppCompatImageButton
@@ -79,7 +79,7 @@
                 android:background="@drawable/bg_circle_gray_selector"
                 android:padding="6dp"
                 android:src="@drawable/icon_eraser_24"
-                app:currentMode="@{currentMode}"
+                app:currentMode="@{viewModel.currentMode}"
                 app:modeValues="@{Arrays.asList(ToolMode.ERASE_VECTOR, ToolMode.ERASE_AREA)}" />
 
         </LinearLayout>

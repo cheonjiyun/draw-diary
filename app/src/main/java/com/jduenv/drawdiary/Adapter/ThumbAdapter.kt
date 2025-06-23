@@ -9,10 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.jduenv.drawdiary.R
 import com.jduenv.drawdiary.data.DrawThumb
 
-private const val TAG = "CustomAdapter 싸피"
-
 class ThumbAdapter(
-    private val resource: Int,
     private val drawingList: MutableList<DrawThumb>,
     private val onItemClick: (DrawThumb) -> Unit
 ) :

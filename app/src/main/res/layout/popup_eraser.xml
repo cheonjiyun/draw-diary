@@ -6,8 +6,8 @@
         <import type="com.jduenv.drawdiary.customView.ToolMode" />
 
         <variable
-            name="currentMode"
-            type="ToolMode" />
+            name="viewModel"
+            type="com.jduenv.drawdiary.viewmodel.DrawingViewModel" />
     </data>
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -32,14 +32,14 @@
                     android:id="@+id/eraser_line"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:checked="@{currentMode == ToolMode.ERASE_VECTOR}"
+                    android:checked="@{viewModel.currentMode == ToolMode.ERASE_VECTOR}"
                     android:text="선 지우개" />
 
                 <com.google.android.material.radiobutton.MaterialRadioButton
                     android:id="@+id/eraser_area"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:checked="@{currentMode == ToolMode.ERASE_AREA}"
+                    android:checked="@{viewModel.currentMode == ToolMode.ERASE_AREA}"
                     android:text="영역 지우개" />
             </RadioGroup>
 

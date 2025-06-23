@@ -19,7 +19,7 @@ class MainActivity : AppCompatActivity() {
         ActivityMainBinding.inflate(layoutInflater)
     }
     private val thumbAdapter by lazy {
-        ThumbAdapter(R.layout.list_item, mutableListOf()) { thumb ->
+        ThumbAdapter(mutableListOf()) { thumb ->
             // 클릭된 썸네일의 파일명(확장자 없이)
             val entryName = File(thumb.path).nameWithoutExtension
             // DrawingActivity 로 이동, ENTRY_NAME 전달
