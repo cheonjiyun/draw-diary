@@ -22,6 +22,8 @@ class MainActivity : AppCompatActivity() {
         ThumbAdapter(mutableListOf()) { thumb ->
             // 클릭된 썸네일의 파일명(확장자 없이)
             val entryName = File(thumb.path).nameWithoutExtension
+                .removeSuffix("_final")
+
             // DrawingActivity 로 이동, ENTRY_NAME 전달
             startActivity(
                 Intent(this@MainActivity, DrawingActivity::class.java)
@@ -57,10 +59,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun loadThumbnails(): List<DrawThumb> {
         val dir = filesDir
-        return dir.listFiles { f -> f.extension.equals("png", ignoreCase = true) }
+        return dir.listFiles { f -> f.name.endsWith("_final.png", ignoreCase = true) }
             ?.map { file ->
-                // 파일명: yyyyMMdd_HHmmss_제목.png
-                val name = file.nameWithoutExtension
+                // 파일명: yyyyMMdd_HHmmss_제목_final.png
+                val name = file.name.removeSuffix("_final.png")
                 val parts = name.split("_", limit = 2)
                 val title = parts.getOrNull(1)?.replace('_', ' ') ?: name
                 val date = Date(file.lastModified())

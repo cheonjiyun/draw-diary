@@ -45,14 +45,52 @@
             android:paddingHorizontal="8dp">
 
             <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/pick_color"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="5dp"
+                android:background="@drawable/bg_circle"
+                android:clickable="true"
+                android:contentDescription="색상 선택"
+                android:focusable="true"
+                android:scaleType="centerInside"
+                app:backgroundTintColor="@{viewModel.currentColor}" />
+
+            <androidx.appcompat.widget.AppCompatImageButton
                 android:id="@+id/pen"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
                 android:background="@drawable/bg_circle_gray_selector"
-                android:src="@drawable/icon_pen_24px"
+                android:src="@drawable/icon_pen"
                 app:currentMode="@{viewModel.currentMode}"
                 app:modeValue="@{ToolMode.DRAW}" />
+
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/eraser"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/bg_circle_gray_selector"
+                android:src="@drawable/icon_eraser_24"
+                app:currentMode="@{viewModel.currentMode}"
+                app:modeValues="@{Arrays.asList(ToolMode.ERASE_VECTOR, ToolMode.ERASE_AREA)}" />
+
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/fill"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/bg_circle_gray_selector"
+                android:src="@drawable/icon_fill"
+                app:currentMode="@{viewModel.currentMode}"
+                app:modeValue="@{ToolMode.FILL}" />
+
 
             <androidx.appcompat.widget.AppCompatImageButton
                 android:id="@+id/undo"
@@ -73,32 +111,6 @@
                 android:padding="6dp"
                 android:src="@drawable/icon_redo_24px"
                 android:tint="@color/selector_undo" />
-
-            <androidx.appcompat.widget.AppCompatImageButton
-                android:id="@+id/eraser"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:background="@drawable/bg_circle_gray_selector"
-                android:src="@drawable/icon_eraser_24"
-                app:currentMode="@{viewModel.currentMode}"
-                app:modeValues="@{Arrays.asList(ToolMode.ERASE_VECTOR, ToolMode.ERASE_AREA)}" />
-
-            <androidx.appcompat.widget.AppCompatImageButton
-                android:id="@+id/pick_color"
-                android:layout_width="28dp"
-                android:layout_height="28dp"
-                android:layout_marginStart="5dp"
-                android:layout_marginTop="5dp"
-                android:layout_marginEnd="8dp"
-                android:layout_marginBottom="5dp"
-                android:background="@drawable/bg_circle"
-                android:clickable="true"
-                android:contentDescription="색상 선택"
-                android:focusable="true"
-                android:scaleType="centerInside"
-                app:backgroundTintColor="@{viewModel.currentColor}" />
-
         </LinearLayout>
 
         <com.jduenv.drawdiary.customView.CustomDrawView

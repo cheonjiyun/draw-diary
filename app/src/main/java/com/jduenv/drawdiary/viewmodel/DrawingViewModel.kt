@@ -11,6 +11,7 @@ import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import com.jduenv.drawdiary.customView.StrokeData
 import com.jduenv.drawdiary.customView.ToolMode
+import com.jduenv.drawdiary.data.DrawingSnapshot
 import com.jduenv.drawdiary.repository.DrawingRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -22,13 +23,14 @@ private const val TAG = "DrawingViewModel"
 class DrawingViewModel(
 ) : ViewModel() {
 
+
     private val repo = DrawingRepository()
 
-    private val _strokes = MutableLiveData<List<StrokeData>>(emptyList())
-    val strokes: LiveData<List<StrokeData>> = _strokes
+    private val _currentSnapshot = MutableLiveData<DrawingSnapshot>()
+    val currentSnapshot: LiveData<DrawingSnapshot> = _currentSnapshot
 
-    private val undoStack = ArrayDeque<List<StrokeData>>()
-    private val redoStack = ArrayDeque<List<StrokeData>>()
+    private val undoStack = ArrayDeque<DrawingSnapshot>()
+    private val redoStack = ArrayDeque<DrawingSnapshot>()
 
     private val _strokeWidth = MutableLiveData(10)
     val strokeWidth: LiveData<Int> = _strokeWidth
@@ -42,8 +44,20 @@ class DrawingViewModel(
     private var _lastEraserMode = ToolMode.ERASE_VECTOR
     val lastEraserMode = _lastEraserMode
 
-    val canUndo: LiveData<Boolean> = _strokes.map { undoStack.isNotEmpty() }
-    val canRedo: LiveData<Boolean> = _strokes.map { redoStack.isNotEmpty() }
+    private val eraserRadius = 30f
+
+    val canUndo: LiveData<Boolean> = currentSnapshot.map { undoStack.isNotEmpty() }
+    val canRedo: LiveData<Boolean> = currentSnapshot.map { redoStack.isNotEmpty() }
+
+    fun initSnapshot(width: Int, height: Int) {
+        if (_currentSnapshot.value == null) {
+            _currentSnapshot.value = DrawingSnapshot(
+                Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888),
+                emptyList()
+            )
+            Log.d(TAG, "initSnapshot: 초기 스냅샷 생성 ($width x $height)")
+        }
+    }
 
 
     fun setCurrentColor(newColor: Int) {
@@ -53,8 +67,15 @@ class DrawingViewModel(
     /** JSON → LiveData 로 초기 로드 */
     fun loadEntry(filesDir: File, entryName: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            val list = repo.loadStrokes(filesDir, entryName) ?: emptyList()
-            _strokes.postValue(list)
+            val strokes = repo.loadStrokes(filesDir, entryName) ?: emptyList()
+            val fillBitmap = repo.loadFillBitmap(filesDir, entryName)
+
+            _currentSnapshot.postValue(
+                DrawingSnapshot(
+                    fillBitmap = fillBitmap,
+                    strokes = strokes
+                )
+            )
         }
     }
 
@@ -84,46 +105,63 @@ class DrawingViewModel(
         setStrokeWidth((_strokeWidth.value ?: 10) + 1)
     }
 
+    fun snapshot(currentBitmap: Bitmap) {
+        _currentSnapshot.value?.let { current ->
+            // 비트맵 깊은 복사
+            val bitmapCopy = currentBitmap.copy(Bitmap.Config.ARGB_8888, true)
+            // strokes는 immutable이라 복사 안 해도 됨 (불변 객체로 간주)
+            val snapshot = DrawingSnapshot(bitmapCopy, current.strokes)
+
+            undoStack.addLast(snapshot)
+            if (undoStack.size > MAX_HISTORY) undoStack.removeFirst()
+
+            redoStack.clear()
+        }
+    }
 
     fun undo() {
-        Log.d(TAG, "undo: ${undoStack}")
+        Log.d(TAG, "undo.size: ${undoStack.size}")
         if (undoStack.isEmpty()) return
-        // ① 마지막 요소 꺼내기
-        val prev = undoStack.removeLast()
-        // ② 현재 상태를 redoStack에 저장
-        redoStack.addLast(_strokes.value ?: emptyList())
-        if (redoStack.size > MAX_HISTORY) redoStack.removeFirst()
-        // ③ LiveData 업데이트
-        _strokes.value = prev
+        Log.d(TAG, "undo: ")
+        redoStack.addLast(_currentSnapshot.value!!) // 현재 상태 push
+        val snapshot = undoStack.removeLast()
+        _currentSnapshot.value = snapshot
     }
 
-    fun redo() {
-
-        Log.d(TAG, "redo: $redoStack")
+    fun redo(currentBitmap: Bitmap) {
         if (redoStack.isEmpty()) return
-        // ① 마지막 요소 꺼내기
+
+        _currentSnapshot.value?.let { current ->
+            // 현재 상태 → undo 스택에 저장
+            val bitmapCopy = currentBitmap.copy(Bitmap.Config.ARGB_8888, true)
+            val snapshot = DrawingSnapshot(bitmapCopy, current.strokes)
+            undoStack.addLast(snapshot)
+            if (undoStack.size > MAX_HISTORY) undoStack.removeFirst()
+        }
+
+        // 복원할 상태
         val next = redoStack.removeLast()
-        // ② 현재 상태를 undoStack에 저장
-        undoStack.addLast(_strokes.value ?: emptyList())
-        if (undoStack.size > MAX_HISTORY) undoStack.removeFirst()
-        // ③ LiveData 업데이트
-        _strokes.value = next
+        _currentSnapshot.value = next
     }
+
 
     /**
      * 새로운 그리기 획을 추가합니다.
      */
-    fun addStroke(stroke: StrokeData) {
-        // 1) undo 스택에 현재 상태 저장
-        undoStack.addLast(_strokes.value ?: emptyList())
-        if (undoStack.size > MAX_HISTORY) undoStack.removeFirst()
+    fun addStroke(stroke: StrokeData, currentBitmap: Bitmap) {
+        Log.d(TAG, "snapshotForUndo: ${_currentSnapshot.value == null}")
 
-        // 2) redo 스택 초기화
+        val current = _currentSnapshot.value
+        if (current != null) {
+            val newStrokes = current.strokes + stroke
+            val newSnapshot =
+                DrawingSnapshot(currentBitmap.copy(Bitmap.Config.ARGB_8888, true), newStrokes)
+            _currentSnapshot.value = newSnapshot
+        }
+
         redoStack.clear()
-
-        // 3) 획 목록 업데이트
-        _strokes.value = (_strokes.value ?: emptyList()) + stroke
     }
+
 
     private val _saveResult = MutableLiveData<Boolean>()
     val saveResult: LiveData<Boolean> = _saveResult
@@ -135,73 +173,75 @@ class DrawingViewModel(
      * @param entryName 파일명(확장자 제외)
      * @param bitmap    CustomDrawView.captureBitmap() 으로 받은 비트맵
      */
-    fun saveAll(filesDir: File, entryName: String, bitmap: Bitmap) {
+    fun saveAll(
+        filesDir: File,
+        entryName: String,
+        fillBitmap: Bitmap,
+        mergedBitmap: Bitmap
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
-            val okJson = repo.saveStrokes(filesDir, entryName, _strokes.value ?: emptyList())
-            val okPng = repo.saveImage(filesDir, entryName, bitmap)
-            _saveResult.postValue(okJson && okPng)
+            val strokes = _currentSnapshot.value?.strokes ?: emptyList()
+
+            val okJson = repo.saveStrokes(filesDir, entryName, strokes)
+            val okFill = repo.saveImage(filesDir, "${entryName}_fill", fillBitmap)
+            val okMerged = repo.saveImage(filesDir, "${entryName}_final", mergedBitmap)
+
+            _saveResult.postValue(okJson && okFill && okMerged)
         }
     }
 
-    private val eraserRadius = 30f
-
-    private fun snapshotForUndo() {
-        undoStack.addLast(_strokes.value ?: emptyList())
-        if (undoStack.size > MAX_HISTORY) undoStack.removeFirst()
-        redoStack.clear()
-
-        Log.d(TAG, "snapshotForUndo: $undoStack")
-    }
-
-    fun beginErase() {
-        snapshotForUndo()
-    }
 
     /** 벡터 지우기: performVectorErase와 동일하게 동작 */
-    fun eraseVector(x: Float, y: Float) {
-        val next = (_strokes.value ?: emptyList()).filter { sd ->
+    fun eraseVector(x: Float, y: Float, currentBitmap: Bitmap) {
+        val current = _currentSnapshot.value ?: return
+
+        Log.d(TAG, "지우기 전 strokes: ${current.strokes.size}")
+        val nextStrokes = current.strokes.filter { sd ->
             sd.points.none { pt -> hypot(pt.x - x, pt.y - y) <= eraserRadius }
         }
 
-        _strokes.value = next
+        _currentSnapshot.value =
+            DrawingSnapshot(currentBitmap.copy(Bitmap.Config.ARGB_8888, true), nextStrokes)
+        Log.d(TAG, "지우고 남은 strokes: ${nextStrokes.size}")
+
     }
 
+
     /** 영역 지우기 */
-    fun eraseArea(x: Float, y: Float) {
+    fun eraseArea(x: Float, y: Float, currentBitmap: Bitmap) {
+        val current = _currentSnapshot.value ?: return
         val newList = mutableListOf<StrokeData>()
 
-        (_strokes.value ?: emptyList()).forEach { sd ->
+        current.strokes.forEach { sd ->
             val pts = sd.points
             val flags = pts.map { pt -> hypot(pt.x - x, pt.y - y) <= eraserRadius }
 
             var segment = mutableListOf<PointF>()
             for ((i, inside) in flags.withIndex()) {
                 if (!inside) {
-                    // 지우개 반경 밖: 남길 부분
                     segment.add(pts[i])
                 } else {
-                    // 지우개 반경 안: 기존 segment가 2점 이상이면 저장
                     if (segment.size > 1) {
-                        newList += StrokeData(
-                            points = segment.toList(),
-                            strokeWidth = sd.strokeWidth,
-                            color = sd.color
-                        )
+                        newList += StrokeData(segment.toList(), sd.strokeWidth, sd.color)
                     }
                     segment = mutableListOf()
                 }
             }
 
             if (segment.size > 1) {
-                newList += StrokeData(
-                    points = segment.toList(),
-                    strokeWidth = sd.strokeWidth,
-                    color = sd.color
-                )
+                newList += StrokeData(segment.toList(), sd.strokeWidth, sd.color)
             }
         }
 
-        _strokes.value = newList
+        _currentSnapshot.value =
+            DrawingSnapshot(currentBitmap.copy(Bitmap.Config.ARGB_8888, true), newList)
+    }
+
+    fun applyFilledBitmap(filledBitmap: Bitmap) {
+        Log.d(TAG, "applyFilledBitmap: $filledBitmap")
+        val current = _currentSnapshot.value ?: return
+        val newSnapshot = DrawingSnapshot(filledBitmap, current.strokes)
+        _currentSnapshot.value = newSnapshot
     }
 
     companion object {

@@ -1,6 +1,5 @@
 package com.jduenv.drawdiary.Activity
 
-import android.R
 import android.os.Bundle
 import android.util.Log
 import android.view.ViewGroup
@@ -12,6 +11,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.jduenv.drawdiary.R
 import com.jduenv.drawdiary.customDrawable.SeekbarThumbNumberDrawable
 import com.jduenv.drawdiary.customView.StrokeData
 import com.jduenv.drawdiary.customView.ToolMode
@@ -62,22 +62,28 @@ class DrawingActivity : AppCompatActivity() {
 
         // 리스너 등록
         binding.customDrawView.apply {
+            setOnCanvasInitializedListener { width, height ->
+                viewModel.initSnapshot(width, height)
+            }
             setOnStrokeCompleteListener { sd ->
-                viewModel.addStroke(sd)
+                val current = getCurrentBitmap() // 또는 getCurrentBitmap()
+                viewModel.addStroke(sd, current)
             }
             // “지우기 시작”에만 snapshotForUndo 호출
-            setOnEraseStartListener {
-                viewModel.beginErase()
+            setOnSnapshotForUndo {
+                viewModel.snapshot(getCurrentBitmap())
             }
             // 실제 지우기 동작은 기존 eraseVector / eraseArea
             setOnEraseListener { mode, x, y ->
                 when (mode) {
-                    ToolMode.ERASE_VECTOR -> viewModel.eraseVector(x, y)
-                    ToolMode.ERASE_AREA -> viewModel.eraseArea(x, y)
+                    ToolMode.ERASE_VECTOR -> viewModel.eraseVector(x, y, getCurrentBitmap())
+                    ToolMode.ERASE_AREA -> viewModel.eraseArea(x, y, getCurrentBitmap())
                     else -> {}
                 }
             }
-            //
+            setOnFillCompleteListener { updatedBitmap ->
+                viewModel.applyFilledBitmap(updatedBitmap)
+            }
         }
 
         // 값이 바뀔 때
@@ -96,6 +102,7 @@ class DrawingActivity : AppCompatActivity() {
 
         binding.customDrawView.post {
             intent.getStringExtra("ENTRY_NAME")?.let { name ->
+                Log.d(TAG, "name: ${name}")
                 viewModel.loadEntry(filesDir, name)
             }
         }
@@ -175,8 +182,10 @@ class DrawingActivity : AppCompatActivity() {
         }
 
         binding.redo.setOnClickListener {
-            viewModel.redo()
+            val current = binding.customDrawView.getCurrentBitmap()
+            viewModel.redo(current)
         }
+
 
         binding.eraser.setOnClickListener {
             // ui
@@ -197,33 +206,33 @@ class DrawingActivity : AppCompatActivity() {
         }
 
         binding.save.setOnClickListener {
-            val bmp = binding.customDrawView.captureBitmap()
-            viewModel.saveAll(filesDir, entryName ?: "untitled", bmp)
+            val fillBitmap = binding.customDrawView.getCurrentBitmap()
+            val mergedBitmap = binding.customDrawView.getMergedBitmap()
+
+            viewModel.saveAll(filesDir, entryName ?: "untitled", fillBitmap, mergedBitmap)
         }
+
+
 
         binding.pickColor.setOnClickListener {
             ColorPickerDialog.Builder(this)
-                .setTitle("ColorPicker Dialog")
-                .setPreferenceName("MyColorPickerDialog")
+                .setPreferenceName("색상선택")
                 .setPositiveButton(
-                    getString(R.string.copy),
+                    getString(R.string.confirm),
                     ColorEnvelopeListener { envelope, fromUser ->
                         viewModel.setCurrentColor(envelope.color)
-                        Log.d(
-                            TAG,
-                            "ColorEnvelopeListener:  ${envelope.hexCode}"
-                        )
-//                        setLayoutColor(envelope)
                     })
                 .setNegativeButton(
                     getString(R.string.cancel)
                 ) { dialogInterface, i -> dialogInterface.dismiss() }
-                .attachAlphaSlideBar(true) // the default value is true.
-                .attachBrightnessSlideBar(true) // the default value is true.
-                .setBottomSpace(12) // set a bottom space between the last slidebar and buttons.
+                .attachAlphaSlideBar(true)
+                .attachBrightnessSlideBar(true)
+                .setBottomSpace(12)
                 .show()
         }
-
+        binding.fill.setOnClickListener {
+            viewModel.selectMode(ToolMode.FILL)
+        }
     }
 
     private fun initEventByPopupEraser() {
@@ -256,6 +265,7 @@ class DrawingActivity : AppCompatActivity() {
 
         // 뒤로가기
         viewModel.canUndo.observe(this) { enabled ->
+            Log.d(TAG, "initObserve: $enabled")
             binding.undo.isEnabled = enabled
         }
 
@@ -263,9 +273,9 @@ class DrawingActivity : AppCompatActivity() {
             binding.redo.isEnabled = enabled
         }
 
-        // 선 정보 변경
-        viewModel.strokes.observe(this) { list ->
-            binding.customDrawView.setStrokes(list)
+        // 그림 정보 변경
+        viewModel.currentSnapshot.observe(this) { snapshot ->
+            binding.customDrawView.update(snapshot.fillBitmap, snapshot.strokes)
         }
 
         // 색
