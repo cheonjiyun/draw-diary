@@ -39,9 +39,8 @@ class DrawingRepository() {
         }
     }
 
-    fun saveText(filesDir: File, entryName: String, text: String): Boolean {
+    fun saveText(filesDir: File, entryName: String, info: DrawingInfo): Boolean {
         return try {
-            val info = DrawingInfo(text)
             val json = Gson().toJson(info)
             File(filesDir, "${entryName}.json").writeText(json)
             true

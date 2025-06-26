@@ -338,8 +338,6 @@ class CustomDrawView(context: Context, attrs: AttributeSet?) :
     }
 
     fun getMergedBitmap(): Bitmap {
-
-
         val bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bmp)
 

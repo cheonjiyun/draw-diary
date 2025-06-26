@@ -39,6 +39,41 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/dateLinearLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginBottom="6dp"
+            android:background="@drawable/bg_editable"
+            android:paddingHorizontal="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="날짜"
+                android:textSize="16sp" />
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="16dp"
+                android:layout_gravity="center"
+                android:layout_margin="6dp"
+                android:background="#888888" />
+
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="@{viewModel.currentInfo.date}"
+                android:textSize="16sp"
+                tools:text="2025년 6월 25일" />
+
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/linearLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -76,7 +111,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
                 android:background="@drawable/bg_circle_gray_selector"
-                android:src="@drawable/icon_eraser_24"
+                android:src="@drawable/icon_eraser"
                 app:currentMode="@{viewModel.currentMode}"
                 app:modeValues="@{Arrays.asList(ToolMode.ERASE_VECTOR, ToolMode.ERASE_AREA)}" />
 
@@ -126,7 +161,9 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:gravity="top" />
+            android:gravity="top"
+            android:hint="내용을 입력해보세요.."
+            android:text="@={viewModel.currentInfo.content}" />
 
     </LinearLayout>
 </layout>

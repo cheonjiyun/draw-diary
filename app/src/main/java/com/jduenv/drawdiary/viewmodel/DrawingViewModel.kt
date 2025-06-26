@@ -11,6 +11,7 @@ import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import com.jduenv.drawdiary.customView.StrokeData
 import com.jduenv.drawdiary.customView.ToolMode
+import com.jduenv.drawdiary.data.DrawingInfo
 import com.jduenv.drawdiary.data.DrawingSnapshot
 import com.jduenv.drawdiary.repository.DrawingRepository
 import kotlinx.coroutines.Dispatchers
@@ -27,6 +28,9 @@ class DrawingViewModel(
 
     private val _currentSnapshot = MutableLiveData<DrawingSnapshot>()
     val currentSnapshot: LiveData<DrawingSnapshot> = _currentSnapshot
+
+    private val _currentInfo = MutableLiveData<DrawingInfo>(DrawingInfo())
+    val currentInfo: LiveData<DrawingInfo> = _currentInfo
 
     private val undoStack = ArrayDeque<DrawingSnapshot>()
     private val redoStack = ArrayDeque<DrawingSnapshot>()
@@ -58,6 +62,11 @@ class DrawingViewModel(
         }
     }
 
+    fun setInfoDate(newDate: String) {
+        val current = currentInfo.value ?: DrawingInfo()
+        _currentInfo.value = current.copy(date = newDate)
+    }
+
 
     fun setCurrentColor(newColor: Int) {
         _currentColor.value = newColor
@@ -66,6 +75,7 @@ class DrawingViewModel(
     /** JSON → LiveData 로 초기 로드 */
     fun loadEntry(filesDir: File, entryName: String) {
         viewModelScope.launch(Dispatchers.IO) {
+            // 그림
             val strokes = repo.loadStrokes(filesDir, entryName) ?: emptyList()
             val fillBitmap = repo.loadFillBitmap(filesDir, entryName)
 
@@ -75,6 +85,10 @@ class DrawingViewModel(
                     strokes = strokes
                 )
             )
+
+            // 날짜, 글 등 이외 정보
+            val info = entryName.let { repo.loadInfo(filesDir, it) }
+            _currentInfo.postValue(info)
         }
     }
 
@@ -176,7 +190,6 @@ class DrawingViewModel(
         entryName: String,
         fillBitmap: Bitmap,
         mergedBitmap: Bitmap,
-        text: String
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             val strokes = _currentSnapshot.value?.strokes ?: emptyList()
@@ -184,9 +197,9 @@ class DrawingViewModel(
             val okJson = repo.saveStrokes(filesDir, entryName, strokes)
             val okFill = repo.saveImage(filesDir, "${entryName}_fill", fillBitmap)
             val okMerged = repo.saveImage(filesDir, "${entryName}_final", mergedBitmap)
-            val okText = repo.saveText(filesDir, "${entryName}_info", text)
+            val okText = currentInfo.value?.let { repo.saveText(filesDir, "${entryName}_info", it) }
 
-            _saveResult.postValue(okJson && okFill && okMerged && okText)
+            _saveResult.postValue(okJson && okFill && okMerged && okText == true)
         }
     }
 

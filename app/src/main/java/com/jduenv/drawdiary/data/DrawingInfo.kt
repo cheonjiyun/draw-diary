@@ -1,5 +1,14 @@
 package com.jduenv.drawdiary.data
 
+import com.jduenv.drawdiary.util.DateUtil
+
 data class DrawingInfo(
-    val content: String
-)
+    var date: String,
+    var content: String
+) {
+    constructor() : this(DEFAULT_DATE, "")
+
+    companion object {
+        val DEFAULT_DATE = DateUtil.getTodayFormatted()
+    }
+}

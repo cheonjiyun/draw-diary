@@ -40,7 +40,7 @@ class ReadDiaryDetailActivity : AppCompatActivity() {
     private fun initBinind() {
         binding.lifecycleOwner = this
         binding.viewModel = viewModel
-        
+
     }
 
 
@@ -76,6 +76,7 @@ class ReadDiaryDetailActivity : AppCompatActivity() {
         super.onResume()
 
         viewModel.loadImage(filesDir)
+        viewModel.loadInfo(filesDir)
     }
 
 

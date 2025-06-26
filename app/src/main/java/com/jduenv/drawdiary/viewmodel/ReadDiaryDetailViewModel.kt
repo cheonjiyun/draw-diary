@@ -21,7 +21,7 @@ class ReadDiaryDetailViewModel : ViewModel() {
     private var _entryName = MutableLiveData<String>()
     val entryName: LiveData<String> = _entryName
 
-    private var _info = MutableLiveData<DrawingInfo>()
+    private var _info = MutableLiveData<DrawingInfo>(DrawingInfo())
     val info: LiveData<DrawingInfo> = _info
 
     fun setEntryName(newEntryName: String) {

@@ -1,5 +1,6 @@
 package com.jduenv.drawdiary.Activity
 
+import android.app.DatePickerDialog
 import android.os.Bundle
 import android.util.Log
 import android.view.ViewGroup
@@ -15,9 +16,11 @@ import com.jduenv.drawdiary.customView.ToolMode
 import com.jduenv.drawdiary.databinding.ActivityDrawingBinding
 import com.jduenv.drawdiary.databinding.PopupEraserBinding
 import com.jduenv.drawdiary.databinding.PopupPenBinding
+import com.jduenv.drawdiary.util.DateUtil.formatDate
 import com.jduenv.drawdiary.viewmodel.DrawingViewModel
 import com.skydoves.colorpickerview.ColorPickerDialog
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
+import java.util.Calendar
 
 
 private const val TAG = "DrawingActivity_싸피"
@@ -125,7 +128,37 @@ class DrawingActivity : AppCompatActivity() {
         popupPenBinding.seekBarPenStroke.thumb = customDrawable
     }
 
+
     private fun initEvent() {
+        binding.save.setOnClickListener {
+            val fillBitmap = binding.customDrawView.getCurrentBitmap()
+            val mergedBitmap = binding.customDrawView.getMergedBitmap()
+
+            viewModel.saveAll(filesDir, entryName ?: "untitled", fillBitmap, mergedBitmap)
+        }
+
+        binding.dateLinearLayout.setOnClickListener {
+            showDatePickerDialog()
+        }
+
+
+        binding.pickColor.setOnClickListener {
+            ColorPickerDialog.Builder(this)
+                .setPreferenceName("색상선택")
+                .setPositiveButton(
+                    getString(R.string.confirm),
+                    ColorEnvelopeListener { envelope, fromUser ->
+                        viewModel.setCurrentColor(envelope.color)
+                    })
+                .setNegativeButton(
+                    getString(R.string.cancel)
+                ) { dialogInterface, i -> dialogInterface.dismiss() }
+                .attachAlphaSlideBar(true)
+                .attachBrightnessSlideBar(true)
+                .setBottomSpace(12)
+                .show()
+        }
+
         binding.pen.setOnClickListener {
             // ui
             // 두번 눌렀을 때만 팝업 윈도우 띄우기
@@ -151,15 +184,6 @@ class DrawingActivity : AppCompatActivity() {
             viewModel.plusStrokeWidth()
         }
 
-        binding.undo.setOnClickListener {
-            viewModel.undo()
-        }
-
-        binding.redo.setOnClickListener {
-            val current = binding.customDrawView.getCurrentBitmap()
-            viewModel.redo(current)
-        }
-
 
         binding.eraser.setOnClickListener {
             // ui
@@ -179,34 +203,22 @@ class DrawingActivity : AppCompatActivity() {
             viewModel.selectMode(viewModel.lastEraserMode)
         }
 
-        binding.save.setOnClickListener {
-            val fillBitmap = binding.customDrawView.getCurrentBitmap()
-            val mergedBitmap = binding.customDrawView.getMergedBitmap()
-            val text = binding.content.text.toString()
 
-            viewModel.saveAll(filesDir, entryName ?: "untitled", fillBitmap, mergedBitmap, text)
-        }
-
-        binding.pickColor.setOnClickListener {
-            ColorPickerDialog.Builder(this)
-                .setPreferenceName("색상선택")
-                .setPositiveButton(
-                    getString(R.string.confirm),
-                    ColorEnvelopeListener { envelope, fromUser ->
-                        viewModel.setCurrentColor(envelope.color)
-                    })
-                .setNegativeButton(
-                    getString(R.string.cancel)
-                ) { dialogInterface, i -> dialogInterface.dismiss() }
-                .attachAlphaSlideBar(true)
-                .attachBrightnessSlideBar(true)
-                .setBottomSpace(12)
-                .show()
-        }
         binding.fill.setOnClickListener {
             viewModel.selectMode(ToolMode.FILL)
         }
+
+        binding.undo.setOnClickListener {
+            viewModel.undo()
+        }
+
+        binding.redo.setOnClickListener {
+            val current = binding.customDrawView.getCurrentBitmap()
+            viewModel.redo(current)
+        }
+
     }
+
 
     private fun initEventByPopupEraser() {
         popupEraserBinding.eraserLine.setOnClickListener {
@@ -229,19 +241,23 @@ class DrawingActivity : AppCompatActivity() {
             binding.eraser.isSelected = mode == ToolMode.ERASE_VECTOR || mode == ToolMode.ERASE_AREA
         }
 
+        // 색
+        viewModel.currentColor.observe(this) { color ->
+            binding.customDrawView.currentColor = color
+        }
+
         // 굵기
         viewModel.strokeWidth.observe(this) { stokeWidth ->
             binding.customDrawView.currentStroke = stokeWidth // data
             popupPenBinding.seekBarPenStroke.progress = stokeWidth // 바
             customDrawable.progress = stokeWidth // 동그라미안에 숫자
         }
-
         // 뒤로가기
         viewModel.canUndo.observe(this) { enabled ->
             Log.d(TAG, "initObserve: $enabled")
             binding.undo.isEnabled = enabled
         }
-
+        // 앞으로가기
         viewModel.canRedo.observe(this) { enabled ->
             binding.redo.isEnabled = enabled
         }
@@ -251,10 +267,6 @@ class DrawingActivity : AppCompatActivity() {
             binding.customDrawView.update(snapshot.fillBitmap, snapshot.strokes)
         }
 
-        // 색
-        viewModel.currentColor.observe(this) { color ->
-            binding.customDrawView.currentColor = color
-        }
 
         // 저장 끝
         viewModel.saveResult.observe(this) { success ->
@@ -262,4 +274,25 @@ class DrawingActivity : AppCompatActivity() {
             if (success) finish()
         }
     }
+
+
+    private fun showDatePickerDialog() {
+        val calendar = Calendar.getInstance()
+        val year = calendar.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH)
+        val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+        val datePickerDialog = DatePickerDialog(
+            this,
+            { _, selectedYear, selectedMonth, selectedDayOfMonth ->
+                // 선택된 날짜 처리
+                val selectedDate = formatDate(selectedYear, selectedMonth + 1, selectedDayOfMonth)
+                viewModel.setInfoDate(selectedDate)
+            },
+            year, month, day
+        )
+
+        datePickerDialog.show()
+    }
+
 }
