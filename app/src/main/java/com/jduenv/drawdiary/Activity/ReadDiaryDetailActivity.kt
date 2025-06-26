@@ -29,10 +29,18 @@ class ReadDiaryDetailActivity : AppCompatActivity() {
             insets
         }
 
+
+        initBinind()
         initGetIntent()
         initEvent()
         initViewModel()
         initObserve()
+    }
+
+    private fun initBinind() {
+        binding.lifecycleOwner = this
+        binding.viewModel = viewModel
+        
     }
 
 
@@ -41,11 +49,11 @@ class ReadDiaryDetailActivity : AppCompatActivity() {
         intent.getStringExtra("ENTRY_NAME")?.let {
             viewModel.setEntryName(it)
         }
-
     }
 
     private fun initViewModel() {
         viewModel.loadImage(filesDir)
+        viewModel.loadInfo(filesDir)
     }
 
     private fun initEvent() {
@@ -66,7 +74,7 @@ class ReadDiaryDetailActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        
+
         viewModel.loadImage(filesDir)
     }
 

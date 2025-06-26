@@ -182,11 +182,10 @@ class DrawingActivity : AppCompatActivity() {
         binding.save.setOnClickListener {
             val fillBitmap = binding.customDrawView.getCurrentBitmap()
             val mergedBitmap = binding.customDrawView.getMergedBitmap()
+            val text = binding.content.text.toString()
 
-            viewModel.saveAll(filesDir, entryName ?: "untitled", fillBitmap, mergedBitmap)
+            viewModel.saveAll(filesDir, entryName ?: "untitled", fillBitmap, mergedBitmap, text)
         }
-
-
 
         binding.pickColor.setOnClickListener {
             ColorPickerDialog.Builder(this)

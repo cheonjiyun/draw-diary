@@ -23,7 +23,6 @@ private const val TAG = "DrawingViewModel"
 class DrawingViewModel(
 ) : ViewModel() {
 
-
     private val repo = DrawingRepository()
 
     private val _currentSnapshot = MutableLiveData<DrawingSnapshot>()
@@ -78,7 +77,6 @@ class DrawingViewModel(
             )
         }
     }
-
 
     /**
      * 그리기 모드를 변경합니다.
@@ -177,7 +175,8 @@ class DrawingViewModel(
         filesDir: File,
         entryName: String,
         fillBitmap: Bitmap,
-        mergedBitmap: Bitmap
+        mergedBitmap: Bitmap,
+        text: String
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             val strokes = _currentSnapshot.value?.strokes ?: emptyList()
@@ -185,8 +184,9 @@ class DrawingViewModel(
             val okJson = repo.saveStrokes(filesDir, entryName, strokes)
             val okFill = repo.saveImage(filesDir, "${entryName}_fill", fillBitmap)
             val okMerged = repo.saveImage(filesDir, "${entryName}_final", mergedBitmap)
+            val okText = repo.saveText(filesDir, "${entryName}_info", text)
 
-            _saveResult.postValue(okJson && okFill && okMerged)
+            _saveResult.postValue(okJson && okFill && okMerged && okText)
         }
     }
 

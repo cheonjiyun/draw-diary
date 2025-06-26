@@ -7,6 +7,7 @@ import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.jduenv.drawdiary.customView.StrokeData
+import com.jduenv.drawdiary.data.DrawingInfo
 import java.io.File
 import java.io.FileOutputStream
 
@@ -31,6 +32,18 @@ class DrawingRepository() {
             FileOutputStream(File(filesDir, "${entryName}.png")).use { out ->
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
             }
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    fun saveText(filesDir: File, entryName: String, text: String): Boolean {
+        return try {
+            val info = DrawingInfo(text)
+            val json = Gson().toJson(info)
+            File(filesDir, "${entryName}.json").writeText(json)
             true
         } catch (e: Exception) {
             e.printStackTrace()
@@ -78,10 +91,25 @@ class DrawingRepository() {
         return if (file.exists()) {
             BitmapFactory.decodeFile(file.absolutePath)
         } else {
+            Log.e(TAG, "loadFinalBitmap: 파일이 존재하지 않습니다.")
             // 기본 흰색 비트맵 생성 (예: 1080x1920 사이즈, 필요 시 조정)
             Bitmap.createBitmap(1080, 1920, Bitmap.Config.ARGB_8888).apply {
                 eraseColor(Color.WHITE)
             }
         }
     }
+
+    fun loadInfo(filesDir: File, entryName: String): DrawingInfo? {
+        val file = File(filesDir, "${entryName}_info.json")
+
+        return try {
+            val json = file.readText()
+            val type = object : TypeToken<DrawingInfo>() {}.type
+            Gson().fromJson<DrawingInfo>(json, type)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
 }

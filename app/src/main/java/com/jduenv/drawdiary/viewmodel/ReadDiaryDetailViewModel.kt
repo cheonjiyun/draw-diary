@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jduenv.drawdiary.data.DrawingInfo
 import com.jduenv.drawdiary.repository.DrawingRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -20,6 +21,9 @@ class ReadDiaryDetailViewModel : ViewModel() {
     private var _entryName = MutableLiveData<String>()
     val entryName: LiveData<String> = _entryName
 
+    private var _info = MutableLiveData<DrawingInfo>()
+    val info: LiveData<DrawingInfo> = _info
+
     fun setEntryName(newEntryName: String) {
         _entryName.value = newEntryName
     }
@@ -32,4 +36,13 @@ class ReadDiaryDetailViewModel : ViewModel() {
         }
     }
 
+    fun loadInfo(filesDir: File) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val info = entryName.value?.let { repo.loadInfo(filesDir, it) }
+
+            _info.postValue(
+                info
+            )
+        }
+    }
 }
