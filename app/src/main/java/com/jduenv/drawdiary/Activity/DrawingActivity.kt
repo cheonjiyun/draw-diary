@@ -137,7 +137,7 @@ class DrawingActivity : AppCompatActivity() {
             viewModel.saveAll(filesDir, entryName ?: "untitled", fillBitmap, mergedBitmap)
         }
 
-        binding.dateLinearLayout.setOnClickListener {
+        binding.date.setOnClickListener {
             showDatePickerDialog()
         }
 

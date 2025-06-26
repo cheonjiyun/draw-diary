@@ -22,56 +22,65 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
+        android:paddingTop="8dp"
         tools:context=".Activity.DrawingActivity">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="end"
-            android:orientation="horizontal">
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/save"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:text="@string/save" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/dateLinearLayout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:layout_marginHorizontal="8dp"
             android:layout_marginBottom="6dp"
-            android:background="@drawable/bg_editable"
-            android:paddingHorizontal="8dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="8dp"
-                android:text="날짜"
-                android:textSize="16sp" />
-
-            <View
-                android:layout_width="1dp"
-                android:layout_height="16dp"
-                android:layout_gravity="center"
-                android:layout_margin="6dp"
-                android:background="#888888" />
-
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/date"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="8dp"
+                android:background="@drawable/bg_editable"
+                android:paddingHorizontal="14dp"
+                android:paddingVertical="8dp"
                 android:text="@{viewModel.currentInfo.date}"
                 android:textSize="16sp"
                 tools:text="2025년 6월 25일" />
 
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/save"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:text="@string/save" />
+
         </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="8dp"
+            android:layout_marginBottom="6dp"
+            android:orientation="horizontal">
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/bg_editable"
+                android:hint="제목을 입력해주세요.."
+                android:paddingHorizontal="14dp"
+                android:paddingVertical="8dp"
+                android:text="@={viewModel.currentInfo.title}" />
+
+
+        </LinearLayout>
+
 
         <LinearLayout
             android:id="@+id/linearLayout"
