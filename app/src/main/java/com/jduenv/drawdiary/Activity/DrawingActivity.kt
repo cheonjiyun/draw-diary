@@ -9,11 +9,8 @@ import android.widget.SeekBar
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.jduenv.drawdiary.R
 import com.jduenv.drawdiary.customDrawable.SeekbarThumbNumberDrawable
-import com.jduenv.drawdiary.customView.StrokeData
 import com.jduenv.drawdiary.customView.ToolMode
 import com.jduenv.drawdiary.databinding.ActivityDrawingBinding
 import com.jduenv.drawdiary.databinding.PopupEraserBinding
@@ -21,7 +18,6 @@ import com.jduenv.drawdiary.databinding.PopupPenBinding
 import com.jduenv.drawdiary.viewmodel.DrawingViewModel
 import com.skydoves.colorpickerview.ColorPickerDialog
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
-import java.io.File
 
 
 private const val TAG = "DrawingActivity_싸피"
@@ -102,7 +98,6 @@ class DrawingActivity : AppCompatActivity() {
 
         binding.customDrawView.post {
             intent.getStringExtra("ENTRY_NAME")?.let { name ->
-                Log.d(TAG, "name: ${name}")
                 viewModel.loadEntry(filesDir, name)
             }
         }
@@ -113,7 +108,6 @@ class DrawingActivity : AppCompatActivity() {
         entryName = intent.getStringExtra("ENTRY_NAME")
         entryName?.let {
             binding.customDrawView.setEntryName(it)
-            loadEntry(it)    // stroke 데이터 로드
         }
     }
 
@@ -129,26 +123,6 @@ class DrawingActivity : AppCompatActivity() {
 
     private fun initSetSeekBarThumb() {
         popupPenBinding.seekBarPenStroke.thumb = customDrawable
-    }
-
-
-    /**
-     * filesDir/ENTRY_NAME.json 에 저장된 획 데이터를 읽어서
-     * customDrawView 에 복원합니다.
-     */
-    private fun loadEntry(entryName: String) {
-        val jsonFile = File(filesDir, "$entryName.json")
-        if (!jsonFile.exists()) return
-
-        try {
-            val json = jsonFile.readText()
-            val type = object : TypeToken<List<StrokeData>>() {}.type
-            val dataList: List<StrokeData> = Gson().fromJson(json, type)
-            binding.customDrawView.setStrokesFromData(dataList)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Toast.makeText(this, "불러오기 실패", Toast.LENGTH_SHORT).show()
-        }
     }
 
     private fun initEvent() {

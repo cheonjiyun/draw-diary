@@ -71,5 +71,17 @@ class DrawingRepository() {
         }
     }
 
+    fun loadFinalBitmap(filesDir: File, entryName: String): Bitmap {
+        // 파일 경로에서 비트맵 로드
+        val file = File(filesDir, "${entryName}_final.png")
 
+        return if (file.exists()) {
+            BitmapFactory.decodeFile(file.absolutePath)
+        } else {
+            // 기본 흰색 비트맵 생성 (예: 1080x1920 사이즈, 필요 시 조정)
+            Bitmap.createBitmap(1080, 1920, Bitmap.Config.ARGB_8888).apply {
+                eraseColor(Color.WHITE)
+            }
+        }
+    }
 }

@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.jduenv.drawdiary.Activity.DrawingActivity
+import com.jduenv.drawdiary.Activity.ReadDiaryDetailActivity
 import com.jduenv.drawdiary.Adapter.ThumbAdapter
 import com.jduenv.drawdiary.data.DrawThumb
 import com.jduenv.drawdiary.databinding.ActivityMainBinding
@@ -26,7 +27,7 @@ class MainActivity : AppCompatActivity() {
 
             // DrawingActivity 로 이동, ENTRY_NAME 전달
             startActivity(
-                Intent(this@MainActivity, DrawingActivity::class.java)
+                Intent(this@MainActivity, ReadDiaryDetailActivity::class.java)
                     .putExtra("ENTRY_NAME", entryName)
             )
         }

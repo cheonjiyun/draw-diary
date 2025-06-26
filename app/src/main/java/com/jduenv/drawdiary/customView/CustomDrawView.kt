@@ -337,32 +337,14 @@ class CustomDrawView(context: Context, attrs: AttributeSet?) :
         onCanvasInitializedListener?.invoke(width, height)
     }
 
-    /**
-     * JSON → StrokeData 리스트를 받아서 internal strokes 로 복원하고 화면을 다시 그림
-     */
-    fun setStrokesFromData(dataList: List<StrokeData>) {
-        strokes.clear()
-        for (d in dataList) {
-            // Paint 복원
-            val paint = Paint().apply {
-                style = Paint.Style.STROKE
-                strokeCap = Paint.Cap.ROUND
-                strokeWidth = d.strokeWidth
-                color = d.color
-            }
-            // PointF 리스트 → Path 로 변환 없이 points 만 보관
-            strokes.add(Stroke(d.points.toMutableList(), paint))
-        }
-
-        redrawBitmapBuffer()
-        invalidate()
-    }
-
     fun getMergedBitmap(): Bitmap {
+
+
         val bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bmp)
 
         // 1. fill 포함된 버퍼 먼저 그리기 (배경 + 페인트통)
+        canvas.drawColor(Color.WHITE)
         canvas.drawBitmap(bitmapFillLayer, 0f, 0f, null)
 
         // 2. strokes(벡터) 다시 그리기
