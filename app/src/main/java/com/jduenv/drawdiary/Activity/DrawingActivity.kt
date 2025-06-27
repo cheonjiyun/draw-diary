@@ -17,6 +17,7 @@ import com.jduenv.drawdiary.databinding.ActivityDrawingBinding
 import com.jduenv.drawdiary.databinding.PopupEraserBinding
 import com.jduenv.drawdiary.databinding.PopupPenBinding
 import com.jduenv.drawdiary.util.DateUtil.formatDate
+import com.jduenv.drawdiary.util.FileNameUtils
 import com.jduenv.drawdiary.viewmodel.DrawingViewModel
 import com.skydoves.colorpickerview.ColorPickerDialog
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
@@ -131,11 +132,14 @@ class DrawingActivity : AppCompatActivity() {
 
     private fun initEvent() {
         binding.save.setOnClickListener {
+            val folderName = FileNameUtils.createEntryFolderName()
+
             val fillBitmap = binding.customDrawView.getCurrentBitmap()
             val mergedBitmap = binding.customDrawView.getMergedBitmap()
 
-            viewModel.saveAll(filesDir, entryName ?: "untitled", fillBitmap, mergedBitmap)
+            viewModel.saveAll(filesDir, entryName ?: folderName, fillBitmap, mergedBitmap)
         }
+
 
         binding.date.setOnClickListener {
             showDatePickerDialog()

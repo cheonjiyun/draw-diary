@@ -161,7 +161,6 @@ class DrawingViewModel(
      * 새로운 그리기 획을 추가합니다.
      */
     fun addStroke(stroke: StrokeData, currentBitmap: Bitmap) {
-        Log.d(TAG, "snapshotForUndo: ${_currentSnapshot.value == null}")
 
         val current = _currentSnapshot.value
         if (current != null) {
@@ -194,10 +193,15 @@ class DrawingViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             val strokes = _currentSnapshot.value?.strokes ?: emptyList()
 
+            val entryDir = File(filesDir, entryName)
+            if (!entryDir.exists()) {
+                entryDir.mkdirs()
+            }
+
             val okJson = repo.saveStrokes(filesDir, entryName, strokes)
-            val okFill = repo.saveImage(filesDir, "${entryName}_fill", fillBitmap)
-            val okMerged = repo.saveImage(filesDir, "${entryName}_final", mergedBitmap)
-            val okText = currentInfo.value?.let { repo.saveText(filesDir, "${entryName}_info", it) }
+            val okFill = repo.saveFill(filesDir, entryName, fillBitmap)
+            val okMerged = repo.saveFinal(filesDir, entryName, mergedBitmap)
+            val okText = currentInfo.value?.let { repo.saveInfo(filesDir, entryName, it) }
 
             _saveResult.postValue(okJson && okFill && okMerged && okText == true)
         }

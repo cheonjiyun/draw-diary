@@ -74,7 +74,8 @@
                 android:layout_weight="1"
                 android:paddingHorizontal="14dp"
                 android:paddingVertical="8dp"
-                android:text="@={viewModel.info.title}" />
+                android:text="@={viewModel.info.title}"
+                android:textSize="16dp" />
 
 
         </LinearLayout>

@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.jduenv.drawdiary.R
 import com.jduenv.drawdiary.data.DrawThumb
@@ -17,6 +18,8 @@ class ThumbAdapter(
 
     inner class Holder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val imageView: ImageView = itemView.findViewById(R.id.thumb)
+        private val textViewDate: TextView = itemView.findViewById(R.id.date)
+        private val textViewTitle: TextView = itemView.findViewById(R.id.title)
 
         fun bind(thumb: DrawThumb) {
             // 파일 경로에서 비트맵 로드
@@ -27,6 +30,9 @@ class ThumbAdapter(
             itemView.setOnClickListener {
                 onItemClick(thumb)
             }
+
+            textViewDate.text = thumb.date
+            textViewTitle.text = thumb.title
         }
     }
 

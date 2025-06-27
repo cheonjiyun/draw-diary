@@ -3,18 +3,19 @@ package com.jduenv.drawdiary
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.jduenv.drawdiary.Activity.DrawingActivity
 import com.jduenv.drawdiary.Activity.ReadDiaryDetailActivity
 import com.jduenv.drawdiary.Adapter.ThumbAdapter
-import com.jduenv.drawdiary.data.DrawThumb
 import com.jduenv.drawdiary.databinding.ActivityMainBinding
-import java.io.File
-import java.util.Date
+import com.jduenv.drawdiary.viewmodel.MainViewModel
 
 class MainActivity : AppCompatActivity() {
+
+    private val viewModel: MainViewModel by viewModels()
 
     private val binding: ActivityMainBinding by lazy {
         ActivityMainBinding.inflate(layoutInflater)
@@ -22,8 +23,7 @@ class MainActivity : AppCompatActivity() {
     private val thumbAdapter by lazy {
         ThumbAdapter(mutableListOf()) { thumb ->
             // 클릭된 썸네일의 파일명(확장자 없이)
-            val entryName = File(thumb.path).nameWithoutExtension
-                .removeSuffix("_final")
+            val entryName = thumb.entryName
 
             // DrawingActivity 로 이동, ENTRY_NAME 전달
             startActivity(
@@ -48,7 +48,9 @@ class MainActivity : AppCompatActivity() {
         binding.recyclerView.adapter = thumbAdapter
 
         initEvent()
+        initObserve()
     }
+
 
     fun initEvent() {
         // + 버튼
@@ -58,24 +60,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun loadThumbnails(): List<DrawThumb> {
-        val dir = filesDir
-        return dir.listFiles { f -> f.name.endsWith("_final.png", ignoreCase = true) }
-            ?.map { file ->
-                // 파일명: yyyyMMdd_HHmmss_제목_final.png
-                val name = file.name.removeSuffix("_final.png")
-                val parts = name.split("_", limit = 2)
-                val title = parts.getOrNull(1)?.replace('_', ' ') ?: name
-                val date = Date(file.lastModified())
-                DrawThumb(path = file.absolutePath, title = title, date = date)
-            } ?: emptyList()
+    private fun initObserve() {
+        viewModel.thumbnails.observe(this) { thumbs ->
+            thumbAdapter.updateData(thumbs)
+        }
     }
 
     override fun onResume() {
         super.onResume()
         // 포그라운드로 돌아올 때마다 갱신
-        val thumbs = loadThumbnails()
-        thumbAdapter.updateData(thumbs)
+        viewModel.loadThumbnails(filesDir)
     }
 
     // 마지막으로 뒤로 가기 버튼을 눌렀던 시간(밀리초)

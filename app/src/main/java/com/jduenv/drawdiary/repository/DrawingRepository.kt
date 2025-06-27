@@ -7,6 +7,7 @@ import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.jduenv.drawdiary.customView.StrokeData
+import com.jduenv.drawdiary.data.DrawThumb
 import com.jduenv.drawdiary.data.DrawingInfo
 import java.io.File
 import java.io.FileOutputStream
@@ -14,22 +15,73 @@ import java.io.FileOutputStream
 private const val TAG = "DrawingRepository"
 
 class DrawingRepository() {
-    /** JSON 으로 획 리스트 저장 */
-    fun saveStrokes(filesDir: File, entryName: String, strokes: List<StrokeData>): Boolean {
-        return try {
-            val json = Gson().toJson(strokes)
-            File(filesDir, "$entryName.json").writeText(json)
-            true
-        } catch (e: Exception) {
-            e.printStackTrace()
-            false
-        }
+
+    // 저장
+    fun saveFinal(baseDir: File, entryName: String, bitmap: Bitmap) =
+        savePng(File(baseDir, entryName), FILE_FINAL, bitmap)
+
+    fun saveFill(baseDir: File, entryName: String, bitmap: Bitmap) =
+        savePng(File(baseDir, entryName), FILE_FILL, bitmap)
+
+    fun saveStrokes(baseDir: File, entryName: String, strokes: List<StrokeData>) =
+        saveJson(File(baseDir, entryName), FILE_STROKES, Gson().toJson(strokes))
+
+    fun saveInfo(baseDir: File, entryName: String, info: DrawingInfo) =
+        saveJson(File(baseDir, entryName), FILE_INFO, Gson().toJson(info))
+
+    // 로드
+    fun loadFinalBitmap(baseDir: File, entryName: String) =
+        loadPng(File(baseDir, entryName), FILE_FINAL)
+
+    fun loadFillBitmap(baseDir: File, entryName: String) =
+        loadPng(File(baseDir, entryName), FILE_FILL)
+
+    fun loadStrokes(baseDir: File, entryName: String): List<StrokeData>? =
+        loadJson(File(baseDir, entryName), FILE_STROKES)
+
+    fun loadInfo(baseDir: File, entryName: String): DrawingInfo? =
+        loadJson(File(baseDir, entryName), FILE_INFO)
+
+    /**
+     * 저장된 모든 엔트리 폴더에서 final.png의 경로, 제목, 수정일을 읽어옵니다.
+     *
+     * @param baseDir 앱의 filesDir, 즉 엔트리 폴더들이 모여있는 상위 디렉토리
+     * @return 각 엔트리의 DrawThumb 리스트
+     */
+    fun loadAllFinalThumbs(baseDir: File): List<DrawThumb> {
+        return baseDir.listFiles()
+            // 1) 엔트리 폴더만 필터링
+            ?.filter { it.isDirectory }
+            // 2) 각 폴더에서 final.png와 info.json을 읽어 DrawThumb 생성
+            ?.mapNotNull { folder ->
+                val entryName = folder.name
+                val dir = File(baseDir, entryName)
+
+                val finalFile = File(dir, FILE_FINAL)
+                if (!finalFile.exists()) return@mapNotNull null
+
+                val info = loadInfo(baseDir, entryName)
+                val title = info?.title ?: entryName
+                val data = info?.date ?: "날짜오류"
+
+                DrawThumb(
+                    entryName = entryName,
+                    path = finalFile.absolutePath,
+                    title = title,
+                    date = data
+                )
+            }
+            // 3) 최신순 정렬
+            ?.sortedByDescending { it.date }
+            ?: emptyList()
     }
 
-    /** Bitmap 을 PNG 로 저장 */
-    fun saveImage(filesDir: File, entryName: String, bitmap: Bitmap): Boolean {
+
+    // ======= private =======
+
+    private fun savePng(filesDir: File, entryName: String, bitmap: Bitmap): Boolean {
         return try {
-            FileOutputStream(File(filesDir, "${entryName}.png")).use { out ->
+            FileOutputStream(File(filesDir, entryName)).use { out ->
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
             }
             true
@@ -39,10 +91,9 @@ class DrawingRepository() {
         }
     }
 
-    fun saveText(filesDir: File, entryName: String, info: DrawingInfo): Boolean {
+    private fun saveJson(filesDir: File, entryName: String, json: String): Boolean {
         return try {
-            val json = Gson().toJson(info)
-            File(filesDir, "${entryName}.json").writeText(json)
+            File(filesDir, entryName).writeText(json)
             true
         } catch (e: Exception) {
             e.printStackTrace()
@@ -50,65 +101,40 @@ class DrawingRepository() {
         }
     }
 
-    /**
-     * 저장된 JSON 파일에서 StrokeData 리스트를 읽어옵니다.
-     * @return 파일이 없거나 파싱 실패 시 null
-     */
-    fun loadStrokes(filesDir: File, entryName: String): List<StrokeData>? {
-        val file = File(filesDir, "$entryName.json")
-        if (!file.exists()) return null
-        return try {
-            val json = file.readText()
-            val type = object : TypeToken<List<StrokeData>>() {}.type
-            Gson().fromJson<List<StrokeData>>(json, type)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
-    }
 
-    fun loadFillBitmap(filesDir: File, entryName: String): Bitmap {
-        val file = File(filesDir, "${entryName}_fill.png")
-
+    private fun loadPng(filesDir: File, fileName: String): Bitmap {
+        val file = File(filesDir, fileName)
         return if (file.exists()) {
             BitmapFactory.decodeFile(file.absolutePath)
         } else {
-            // 로그 출력
-            Log.e(TAG, "fill bitmap not found: ${file.absolutePath}")
-
-            // 기본 흰색 비트맵 생성 (예: 1080x1920 사이즈, 필요 시 조정)
+            Log.e(TAG, "loadPng: 파일이 존재하지 않습니다. ${file.absolutePath}")
             Bitmap.createBitmap(1080, 1920, Bitmap.Config.ARGB_8888).apply {
                 eraseColor(Color.WHITE)
             }
         }
     }
 
-    fun loadFinalBitmap(filesDir: File, entryName: String): Bitmap {
-        // 파일 경로에서 비트맵 로드
-        val file = File(filesDir, "${entryName}_final.png")
-
-        return if (file.exists()) {
-            BitmapFactory.decodeFile(file.absolutePath)
-        } else {
-            Log.e(TAG, "loadFinalBitmap: 파일이 존재하지 않습니다.")
-            // 기본 흰색 비트맵 생성 (예: 1080x1920 사이즈, 필요 시 조정)
-            Bitmap.createBitmap(1080, 1920, Bitmap.Config.ARGB_8888).apply {
-                eraseColor(Color.WHITE)
-            }
+    private inline fun <reified T> loadJson(filesDir: File, fileName: String): T? {
+        val file = File(filesDir, fileName)
+        if (!file.exists()) {
+            Log.e(TAG, "loadJson: 파일이 존재하지 않습니다. ${file.absolutePath}")
+            return null
         }
-    }
-
-    fun loadInfo(filesDir: File, entryName: String): DrawingInfo? {
-        val file = File(filesDir, "${entryName}_info.json")
-
         return try {
             val json = file.readText()
-            val type = object : TypeToken<DrawingInfo>() {}.type
-            Gson().fromJson<DrawingInfo>(json, type)
+            val type = object : TypeToken<T>() {}.type
+            Gson().fromJson<T>(json, type)
         } catch (e: Exception) {
             e.printStackTrace()
             null
         }
+    }
+
+    companion object {
+        private const val FILE_FINAL = "final.png"
+        private const val FILE_FILL = "fill.png"
+        private const val FILE_STROKES = "strokes.json"
+        private const val FILE_INFO = "info.json"
     }
 
 }

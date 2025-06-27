@@ -8,7 +8,8 @@
     <ImageView
         android:id="@+id/thumb"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:contentDescription="@string/draw"
         android:padding="10dp"
         android:src="@drawable/ic_launcher_background" />
@@ -17,9 +18,15 @@
         android:id="@+id/date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="8dp"
+        android:paddingBottom="3dp"
         android:text="날짜"
-        android:textSize="16sp"
         tools:text="2025년 6월 25일" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="제목"
+        tools:text="제목구역" />
 
 </LinearLayout>

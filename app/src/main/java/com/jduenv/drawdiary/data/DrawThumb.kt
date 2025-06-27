@@ -1,10 +1,9 @@
 package com.jduenv.drawdiary.data
 
-import java.util.Date
-
 
 data class DrawThumb(
+    val entryName: String, // 폴더 이름
     val path: String,
     val title: String,
-    val date: Date
+    val date: String
 )
