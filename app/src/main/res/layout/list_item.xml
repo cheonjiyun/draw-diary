@@ -2,16 +2,18 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="250dp"
-    android:orientation="vertical">
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="10dp">
 
     <ImageView
         android:id="@+id/thumb"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
         android:contentDescription="@string/draw"
-        android:padding="10dp"
+        android:paddingBottom="3dp"
+        android:scaleType="fitCenter"
         android:src="@drawable/ic_launcher_background" />
 
     <com.google.android.material.textview.MaterialTextView
@@ -20,6 +22,7 @@
         android:layout_height="wrap_content"
         android:paddingBottom="3dp"
         android:text="날짜"
+        android:textStyle="bold"
         tools:text="2025년 6월 25일" />
 
     <com.google.android.material.textview.MaterialTextView

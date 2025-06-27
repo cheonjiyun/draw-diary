@@ -58,7 +58,6 @@ class DrawingViewModel(
                 Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888),
                 emptyList()
             )
-            Log.d(TAG, "initSnapshot: 초기 스냅샷 생성 ($width x $height)")
         }
     }
 
@@ -212,15 +211,12 @@ class DrawingViewModel(
     fun eraseVector(x: Float, y: Float, currentBitmap: Bitmap) {
         val current = _currentSnapshot.value ?: return
 
-        Log.d(TAG, "지우기 전 strokes: ${current.strokes.size}")
         val nextStrokes = current.strokes.filter { sd ->
             sd.points.none { pt -> hypot(pt.x - x, pt.y - y) <= eraserRadius }
         }
 
         _currentSnapshot.value =
             DrawingSnapshot(currentBitmap.copy(Bitmap.Config.ARGB_8888, true), nextStrokes)
-        Log.d(TAG, "지우고 남은 strokes: ${nextStrokes.size}")
-
     }
 
 
@@ -252,6 +248,21 @@ class DrawingViewModel(
 
         _currentSnapshot.value =
             DrawingSnapshot(currentBitmap.copy(Bitmap.Config.ARGB_8888, true), newList)
+    }
+    
+    fun eraserAll(width: Int, height: Int) {
+        // 새로 빈 흰색 비트맵 생성
+        val blankBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888).apply {
+            eraseColor(Color.WHITE)
+        }
+
+        // 새로운 Snapshot을 LiveData에 반영
+        _currentSnapshot.postValue(
+            DrawingSnapshot(
+                fillBitmap = blankBitmap,
+                strokes = emptyList()
+            )
+        )
     }
 
     fun applyFilledBitmap(filledBitmap: Bitmap) {

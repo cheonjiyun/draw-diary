@@ -207,7 +207,6 @@ class DrawingActivity : AppCompatActivity() {
             viewModel.selectMode(viewModel.lastEraserMode)
         }
 
-
         binding.fill.setOnClickListener {
             viewModel.selectMode(ToolMode.FILL)
         }
@@ -231,6 +230,14 @@ class DrawingActivity : AppCompatActivity() {
 
         popupEraserBinding.eraserArea.setOnClickListener {
             viewModel.selectMode(ToolMode.ERASE_AREA)
+        }
+
+        popupEraserBinding.eraserAll.setOnClickListener {
+            viewModel.snapshot(binding.customDrawView.getCurrentBitmap())
+            viewModel.eraserAll(
+                binding.customDrawView.width,
+                binding.customDrawView.height
+            )
         }
     }
 

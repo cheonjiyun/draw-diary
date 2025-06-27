@@ -40,7 +40,6 @@ class ReadDiaryDetailActivity : AppCompatActivity() {
     private fun initBinind() {
         binding.lifecycleOwner = this
         binding.viewModel = viewModel
-
     }
 
 
