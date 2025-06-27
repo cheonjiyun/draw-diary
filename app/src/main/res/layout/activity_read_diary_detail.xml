@@ -53,12 +53,16 @@
                 android:layout_height="1dp"
                 android:layout_weight="1" />
 
-            <TextView
-                android:id="@+id/modify"
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/more"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="10dp"
-                android:text="@string/modify" />
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="더보기"
+                android:padding="6dp"
+                android:src="@drawable/icon_more" />
+
         </LinearLayout>
 
         <LinearLayout
@@ -80,18 +84,18 @@
 
         </LinearLayout>
 
-
         <ImageView
             android:id="@+id/imageView"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="3" />
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:contentDescription="그림"
+            android:scaleType="fitCenter" />
 
 
         <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1">
+            android:layout_height="wrap_content">
 
             <TextView
                 android:layout_width="match_parent"

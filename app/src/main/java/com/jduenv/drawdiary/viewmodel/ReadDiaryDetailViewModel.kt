@@ -24,6 +24,10 @@ class ReadDiaryDetailViewModel : ViewModel() {
     private var _info = MutableLiveData<DrawingInfo>(DrawingInfo())
     val info: LiveData<DrawingInfo> = _info
 
+    private val _deleteResult = MutableLiveData<Boolean>()
+    val deleteResult: LiveData<Boolean> = _deleteResult
+
+
     fun setEntryName(newEntryName: String) {
         _entryName.value = newEntryName
     }
@@ -43,6 +47,13 @@ class ReadDiaryDetailViewModel : ViewModel() {
             _info.postValue(
                 info
             )
+        }
+    }
+
+    fun deleteEntry(baseDir: File) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val success = entryName.value?.let { repo.deleteDirectory(baseDir, it) }
+            _deleteResult.postValue(success)
         }
     }
 }

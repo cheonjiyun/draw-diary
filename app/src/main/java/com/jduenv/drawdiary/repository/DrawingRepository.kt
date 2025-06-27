@@ -76,6 +76,10 @@ class DrawingRepository() {
             ?: emptyList()
     }
 
+    fun deleteDirectory(baseDir: File, entryName: String): Boolean {
+        val entryDir = File(baseDir, entryName)
+        return entryDir.deleteRecursively()
+    }
 
     // ======= private =======
 
