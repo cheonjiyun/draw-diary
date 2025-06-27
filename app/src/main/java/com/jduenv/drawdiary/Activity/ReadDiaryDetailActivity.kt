@@ -97,7 +97,7 @@ class ReadDiaryDetailActivity : AppCompatActivity() {
     }
 
     private fun download() {
-
+        viewModel.exportImage(filesDir, this)
     }
 
     private fun modify() {
@@ -129,6 +129,18 @@ class ReadDiaryDetailActivity : AppCompatActivity() {
                 finish() // 또는 리스트 갱신
             } else {
                 Toast.makeText(this, "삭제에 실패했습니다.", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        viewModel.exportResult.observe(this) { success ->
+            if (success) {
+                Toast.makeText(
+                    this,
+                    "갤러리 ${getString(R.string.app_name)}폴더에 저장되었습니다.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                Toast.makeText(this, "저장 실패했습니다.", Toast.LENGTH_SHORT).show()
             }
         }
     }

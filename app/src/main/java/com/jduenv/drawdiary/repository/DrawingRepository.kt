@@ -1,11 +1,18 @@
 package com.jduenv.drawdiary.repository
 
+import android.content.ContentValues
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.media.MediaScannerConnection
+import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
 import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.jduenv.drawdiary.R
 import com.jduenv.drawdiary.customView.StrokeData
 import com.jduenv.drawdiary.data.DrawThumb
 import com.jduenv.drawdiary.data.DrawingInfo
@@ -79,6 +86,69 @@ class DrawingRepository() {
     fun deleteDirectory(baseDir: File, entryName: String): Boolean {
         val entryDir = File(baseDir, entryName)
         return entryDir.deleteRecursively()
+    }
+
+
+    fun downLoad(context: Context, baseDir: File, entryName: String, info: DrawingInfo): Boolean {
+        val srcFile = File(baseDir, "$entryName/final.png")
+        if (!srcFile.exists()) {
+            return false
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // Android 10 이상
+            val filename = "${entryName}_${info.title}_${info.date}.png"
+
+            val contentValues = ContentValues().apply {
+                put(MediaStore.Images.Media.DISPLAY_NAME, filename)
+                put(MediaStore.Images.Media.MIME_TYPE, "image/png")
+                put(
+                    MediaStore.Images.Media.RELATIVE_PATH,
+                    Environment.DIRECTORY_PICTURES + "/" + context.getString(R.string.app_name)
+                )
+                put(MediaStore.Images.Media.IS_PENDING, 1)
+            }
+
+            val resolver = context.contentResolver
+            val collection =
+                MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+            val itemUri = resolver.insert(collection, contentValues)
+
+            if (itemUri != null) {
+                resolver.openOutputStream(itemUri).use { outputStream ->
+                    srcFile.inputStream().use { inputStream ->
+                        inputStream.copyTo(outputStream!!)
+                    }
+                }
+
+                contentValues.clear()
+                contentValues.put(MediaStore.Images.Media.IS_PENDING, 0)
+                resolver.update(itemUri, contentValues, null, null)
+
+            }
+
+        } else {
+            // Android 9 이하
+            val picturesDir =
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+            val myFolder = File(picturesDir, context.getString(R.string.app_name))
+            if (!myFolder.exists()) {
+                myFolder.mkdirs()
+            }
+
+            val destFile = File(myFolder, "${entryName}_${info.title}_${info.date}.png")
+            srcFile.copyTo(destFile, overwrite = true)
+
+            // MediaScanner로 갤러리에 반영
+            MediaScannerConnection.scanFile(
+                context,
+                arrayOf(destFile.absolutePath),
+                arrayOf("image/png"),
+                null
+            )
+
+        }
+        return true
     }
 
     // ======= private =======

@@ -1,5 +1,6 @@
 package com.jduenv.drawdiary.viewmodel
 
+import android.content.Context
 import android.graphics.Bitmap
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -26,6 +27,9 @@ class ReadDiaryDetailViewModel : ViewModel() {
 
     private val _deleteResult = MutableLiveData<Boolean>()
     val deleteResult: LiveData<Boolean> = _deleteResult
+
+    private val _exportResult = MutableLiveData<Boolean>()
+    val exportResult: LiveData<Boolean> = _exportResult
 
 
     fun setEntryName(newEntryName: String) {
@@ -56,4 +60,21 @@ class ReadDiaryDetailViewModel : ViewModel() {
             _deleteResult.postValue(success)
         }
     }
+
+    fun exportImage(baseDir: File, context: Context) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val name = entryName.value
+            val info = _info.value
+
+            val success = if (name != null && info != null) {
+                repo.downLoad(context, baseDir, name, info) // 스마트 캐스트로 name, info는 non-null
+            } else {
+                null
+            }
+
+            _exportResult.postValue(success)
+        }
+    }
+
+
 }
