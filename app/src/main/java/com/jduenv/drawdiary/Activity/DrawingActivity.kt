@@ -9,6 +9,7 @@ import android.widget.PopupWindow
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.jduenv.drawdiary.R
 import com.jduenv.drawdiary.customDrawable.SeekbarThumbNumberDrawable
@@ -129,15 +130,38 @@ class DrawingActivity : AppCompatActivity() {
         popupPenBinding.seekBarPenStroke.thumb = customDrawable
     }
 
+    private fun onSave() {
+        val folderName = FileNameUtils.createEntryFolderName()
+
+        val fillBitmap = binding.customDrawView.getCurrentBitmap()
+        val mergedBitmap = binding.customDrawView.getMergedBitmap()
+
+        viewModel.saveAll(
+            filesDir,
+            entryName ?: folderName,
+            fillBitmap,
+            mergedBitmap
+        )
+    }
+
 
     private fun initEvent() {
         binding.save.setOnClickListener {
-            val folderName = FileNameUtils.createEntryFolderName()
+            val titleText = binding.title.text?.toString()?.trim()
 
-            val fillBitmap = binding.customDrawView.getCurrentBitmap()
-            val mergedBitmap = binding.customDrawView.getMergedBitmap()
-
-            viewModel.saveAll(filesDir, entryName ?: folderName, fillBitmap, mergedBitmap)
+            if (titleText.isNullOrEmpty()) {
+                // 제목이 없으면 다이얼로그
+                AlertDialog.Builder(this)
+                    .setTitle("제목이 없습니다")
+                    .setMessage("제목 없이 저장하시겠습니까?")
+                    .setPositiveButton("저장") { _, _ ->
+                        onSave()
+                    }
+                    .setNegativeButton("취소", null)
+                    .show()
+            } else {
+                onSave()
+            }
         }
 
 

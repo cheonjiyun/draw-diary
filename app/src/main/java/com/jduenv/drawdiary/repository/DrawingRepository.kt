@@ -16,6 +16,7 @@ import com.jduenv.drawdiary.R
 import com.jduenv.drawdiary.customView.StrokeData
 import com.jduenv.drawdiary.data.DrawThumb
 import com.jduenv.drawdiary.data.DrawingInfo
+import com.jduenv.drawdiary.util.DateUtil.parseTimestampFromEntryName
 import java.io.File
 import java.io.FileOutputStream
 
@@ -78,8 +79,13 @@ class DrawingRepository() {
                     date = data
                 )
             }
-            // 3) 최신순 정렬
-            ?.sortedByDescending { it.date }
+            // 3) 최신순 정렬 (date > 생성일)
+            ?.sortedWith(
+                compareByDescending<DrawThumb> { it.date }
+                    .thenByDescending { parseTimestampFromEntryName(it.entryName) }
+            )
+
+
             ?: emptyList()
     }
 

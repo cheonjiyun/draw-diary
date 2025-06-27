@@ -70,6 +70,7 @@
             android:orientation="horizontal">
 
             <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/title"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"

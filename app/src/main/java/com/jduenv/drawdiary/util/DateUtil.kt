@@ -15,4 +15,15 @@ object DateUtil {
         val formatter = SimpleDateFormat("yyyy년 M월 d일", Locale.KOREA)
         return formatter.format(today)
     }
+    
+    fun parseTimestampFromEntryName(entryName: String): Long {
+        return try {
+            val dateString = entryName.substring(0, 15) // "yyyyMMdd_HHmmss"
+            val format = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
+            format.parse(dateString)?.time ?: 0L
+        } catch (e: Exception) {
+            0L
+        }
+    }
+
 }
