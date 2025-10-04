@@ -1,6 +1,5 @@
 ﻿# draw-diary
 
-![제목을 입력해주세요_-001](https://github.com/user-attachments/assets/4bcd82a3-3d73-4f48-ad1f-8c37abb954b2)
 
 
 
@@ -52,3 +51,4 @@
 |사진저장|수정하기|삭제하기|
 |---|---|---|
 | <img src="/readme-img/다운로드.gif" width="220px" title="다운로드" alt="다운로드"></img> |  <img src="/readme-img/수정하기.gif" width="220px" title="수정하기" alt="수정하기"></img>  |  <img src="/readme-img/삭제하기.gif" width="220px" title="삭제하기" alt="삭제하기"></img> |
+
